@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:games-api": "node scripts/test-games-api.mjs"
+    "test:games-api": "node scripts/test-games-api.mjs",
+    "test:categories-api": "node scripts/test-categories-api.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.2.0",

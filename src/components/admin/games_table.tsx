@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Game } from '../../types/game';
+import type { Category } from '../../types/category';
 
 type GamesResponse = {
   items: Game[];
@@ -13,6 +14,7 @@ type GamesResponse = {
     draft: number;
     archived: number;
   };
+  categoriesByGameId?: Record<string, Category[]>;
 };
 
 const inputClass =
@@ -31,11 +33,25 @@ export function GamesTable() {
   const [total, setTotal] = React.useState(0);
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('');
+  const [categoryId, setCategoryId] = React.useState('');
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [page, setPage] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [categoriesByGameId, setCategoriesByGameId] = React.useState<Record<string, Category[]>>({});
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const loadCategories = React.useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories?is_active=true&limit=500');
+      if (!res.ok) return;
+      const data = (await res.json()) as { items: Category[] };
+      setCategories(Array.isArray(data.items) ? data.items : []);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -44,6 +60,7 @@ export function GamesTable() {
       const params = new URLSearchParams();
       if (search.trim()) params.set('search', search.trim());
       if (status) params.set('status', status);
+      if (categoryId) params.set('category_id', categoryId);
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String((page - 1) * PAGE_SIZE));
 
@@ -59,12 +76,17 @@ export function GamesTable() {
       setItems(data.items ?? []);
       setTotal(data.total ?? 0);
       setSummary(data.summary ?? { total: 0, published: 0, draft: 0, archived: 0 });
+      setCategoriesByGameId(data.categoriesByGameId ?? {});
     } catch {
       setError('Error al cargar el listado');
     } finally {
       setLoading(false);
     }
-  }, [search, status, page]);
+  }, [search, status, categoryId, page]);
+
+  React.useEffect(() => {
+    void loadCategories();
+  }, [loadCategories]);
 
   React.useEffect(() => {
     void load();
@@ -117,6 +139,17 @@ export function GamesTable() {
     void load();
   };
 
+  const getCategoryLabel = (gameId: string) => {
+    const gameCategories = categoriesByGameId[gameId] ?? [];
+    if (gameCategories.length === 0) return 'Sin categorias';
+    const levels = gameCategories.filter((cat) => cat.type === 'level').map((cat) => cat.name);
+    const courses = gameCategories.filter((cat) => cat.type === 'course').map((cat) => cat.name);
+    const parts: string[] = [];
+    if (levels.length) parts.push(`Nivel: ${levels.join(', ')}`);
+    if (courses.length) parts.push(`Curso: ${courses.join(', ')}`);
+    return parts.join(' | ');
+  };
+
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -161,6 +194,21 @@ export function GamesTable() {
             <option value="archived">Archivado</option>
           </select>
         </div>
+        <div className="w-full md:w-64">
+          <label className="block text-sm font-medium">Categoria</label>
+          <select
+            className={inputClass}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+          >
+            <option value="">Todas</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.type === 'level' ? 'Nivel' : 'Curso'}: {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           type="button"
           onClick={onApplyFilters}
@@ -178,6 +226,7 @@ export function GamesTable() {
             <tr>
               <th className="px-4 py-2 text-left">Titulo</th>
               <th className="px-4 py-2 text-left">Slug</th>
+              <th className="px-4 py-2 text-left">Categorias</th>
               <th className="px-4 py-2 text-left">Estado</th>
               <th className="px-4 py-2 text-left">Acciones</th>
             </tr>
@@ -187,6 +236,7 @@ export function GamesTable() {
               <tr key={game.id}>
                 <td className="px-4 py-2">{game.title}</td>
                 <td className="px-4 py-2">{game.slug}</td>
+                <td className="px-4 py-2 text-xs text-gray-700">{getCategoryLabel(game.id)}</td>
                 <td className="px-4 py-2">{game.status}</td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-3">
@@ -218,7 +268,7 @@ export function GamesTable() {
             ))}
             {!loading && items.length === 0 && (
               <tr>
-                <td className="px-4 py-6" colSpan={4}>
+                <td className="px-4 py-6" colSpan={5}>
                   No hay juegos para mostrar.
                 </td>
               </tr>

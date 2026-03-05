@@ -1,11 +1,15 @@
 import { GameForm } from '@/src/components/admin/game_form';
 import { getGameById } from '@/src/lib/db/games';
+import { getGameCategorySelections } from '@/src/lib/db/categories';
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditGamePage({ params }: Props) {
   const { id } = await params;
-  const game = await getGameById(id);
+  const [game, selections] = await Promise.all([
+    getGameById(id),
+    getGameCategorySelections(id),
+  ]);
 
   if (!game) {
     return (
@@ -22,7 +26,7 @@ export default async function EditGamePage({ params }: Props) {
         <h2 className="text-2xl font-semibold">Editar juego</h2>
         <p className="text-sm text-gray-600">Actualiza los datos del juego.</p>
       </header>
-      <GameForm mode="edit" gameId={game.id} initialData={game} />
+      <GameForm mode="edit" gameId={game.id} initialData={game} initialSelections={selections} />
     </main>
   );
 }
