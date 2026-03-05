@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/src/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
@@ -74,13 +74,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, message: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+    const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return NextResponse.json(
+        { ok: false, message: 'Configuración de Supabase incompleta' },
+        { status: 500 }
+      );
+    }
 
-    const { error } = await supabase.auth.admin.createUser({
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false },
+    });
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: false,
     });
 
     if (error) {
