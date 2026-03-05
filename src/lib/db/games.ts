@@ -37,6 +37,8 @@ export interface ListGamesParams {
   limit?: number;
   offset?: number;
   categoryId?: string;
+  categoryIds?: string[];
+  throwOnError?: boolean;
 }
 
 export interface GamesSummary {
@@ -72,52 +74,116 @@ async function buildSummary(): Promise<GamesSummary> {
   };
 }
 
+async function buildSummarySafe(): Promise<GamesSummary> {
+  try {
+    return await buildSummary();
+  } catch (err) {
+    console.error('[games-db] summary error', err);
+    return { total: 0, published: 0, draft: 0, archived: 0 };
+  }
+}
+
 export async function listGames(params: ListGamesParams = {}) {
-  const { status, search, limit = 20, offset = 0, categoryId } = params;
+  const {
+    status,
+    search,
+    limit = 20,
+    offset = 0,
+    categoryId,
+    categoryIds,
+    throwOnError = false,
+  } = params;
   const supabase = getSupabaseClient();
 
-  let query = supabase
-    .from('games')
-    .select('*', { count: 'exact' })
-    .order('updated_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+  const normalizedCategoryIds = Array.from(
+    new Set([...(categoryIds ?? []), ...(categoryId ? [categoryId] : [])])
+  ).filter(Boolean);
 
-  if (categoryId) {
-    const { data: links, error: linksError } = await supabase
-      .from('game_categories')
-      .select('game_id')
-      .eq('category_id', categoryId);
+  try {
+    let gameIds: string[] | null = null;
+    if (normalizedCategoryIds.length > 0) {
+      const { data: links, error: linksError } = await supabase
+        .from('game_categories')
+        .select('game_id')
+        .in('category_id', normalizedCategoryIds);
 
-    if (linksError) throw new Error(linksError.message);
+      if (linksError) throw new Error(linksError.message);
 
-    const ids = (links ?? []).map((row) => row.game_id as string).filter(Boolean);
-    if (ids.length === 0) {
-      const summary = await buildSummary();
-      return { items: [], total: 0, summary };
+      const ids = (links ?? []).map((row) => row.game_id as string).filter(Boolean);
+      if (ids.length === 0) {
+        const summary = await buildSummarySafe();
+        return { items: [], total: 0, summary };
+      }
+      gameIds = Array.from(new Set(ids));
     }
 
-    query = query.in(ID_COLUMN, ids);
+    let itemsQuery = supabase
+      .from('games')
+      .select('*')
+      .order('updated_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (gameIds) {
+      itemsQuery = itemsQuery.in(ID_COLUMN, gameIds);
+    }
+
+    if (status) {
+      itemsQuery = itemsQuery.eq('status', status);
+    }
+
+    if (search?.trim()) {
+      const term = `%${search.trim()}%`;
+      itemsQuery = itemsQuery.or(`title.ilike.${term},slug.ilike.${term}`);
+    }
+
+    const { data, error } = await itemsQuery;
+    if (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[games-db] listGames query error', error);
+      }
+      return { items: [], total: 0, summary: await buildSummarySafe() };
+    }
+
+    let countQuery = supabase
+      .from('games')
+      .select('id', { count: 'exact', head: true });
+
+    if (gameIds) {
+      countQuery = countQuery.in(ID_COLUMN, gameIds);
+    }
+
+    if (status) {
+      countQuery = countQuery.eq('status', status);
+    }
+
+    if (search?.trim()) {
+      const term = `%${search.trim()}%`;
+      countQuery = countQuery.or(`title.ilike.${term},slug.ilike.${term}`);
+    }
+
+    const { count, error: countError } = await countQuery;
+    if (countError && process.env.NODE_ENV !== 'production') {
+      console.error('[games-db] listGames count error', countError);
+    }
+
+    const summary = await buildSummarySafe();
+
+    return {
+      items: (data ?? []).map((row) => normalizeGame(row as Record<string, unknown>)),
+      total: count ?? (data?.length ?? 0),
+      summary,
+    };
+  } catch (err) {
+    if (throwOnError) {
+      throw err;
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[games-db] listGames error', err);
+    }
+    const emptySummary: GamesSummary = { total: 0, published: 0, draft: 0, archived: 0 };
+    return { items: [], total: 0, summary: emptySummary };
   }
-
-  if (status) {
-    query = query.eq('status', status);
-  }
-
-  if (search?.trim()) {
-    const term = `%${search.trim()}%`;
-    query = query.or(`title.ilike.${term},slug.ilike.${term}`);
-  }
-
-  const { data, count, error } = await query;
-  if (error) throw new Error(error.message);
-
-  const summary = await buildSummary();
-
-  return {
-    items: (data ?? []).map((row) => normalizeGame(row as Record<string, unknown>)),
-    total: count ?? 0,
-    summary,
-  };
 }
 
 export async function getGameById(id: string): Promise<Game | null> {
@@ -166,3 +232,4 @@ export async function deleteGame(id: string): Promise<boolean> {
   }
   return Array.isArray(data) && data.length > 0;
 }
+

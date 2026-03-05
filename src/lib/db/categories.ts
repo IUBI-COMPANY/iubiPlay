@@ -139,6 +139,17 @@ export async function getCategoryById(id: string): Promise<Category | null> {
   return normalizeCategory(data as Record<string, unknown>);
 }
 
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  if (error || !data) return null;
+  return normalizeCategory(data as Record<string, unknown>);
+}
+
 export async function createCategory(
   input: Omit<Category, 'id' | 'created_at' | 'updated_at'>
 ): Promise<Category> {
@@ -238,8 +249,12 @@ export async function getCategoriesByGameIds(gameIds: string[]): Promise<Record<
   const map: Record<string, Category[]> = {};
   for (const row of data ?? []) {
     const gameId = row.game_id as string;
-    const category = row.category as Category | null;
-    if (!gameId || !category) continue;
+    const rawCategory = row.category as unknown;
+    const normalized = Array.isArray(rawCategory) ? rawCategory[0] : rawCategory;
+
+    if (!gameId || !normalized || typeof normalized !== 'object') continue;
+
+    const category = normalizeCategory(normalized as Record<string, unknown>);
     if (!map[gameId]) map[gameId] = [];
     map[gameId].push(category);
   }
