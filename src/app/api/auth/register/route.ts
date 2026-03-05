@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { setAuthCookies } from '@/src/lib/auth/cookies';
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       auth: { persistSession: false },
     });
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -100,7 +101,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, message }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true, message: 'Revisa tu correo para continuar' }, { status: 201 });
+    const res = NextResponse.json({ ok: true, message: 'Revisa tu correo para continuar' }, { status: 201 });
+    if (data?.session) {
+      setAuthCookies(res, data.session);
+    }
+    return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error interno';
     if (process.env.NODE_ENV !== 'production') {
