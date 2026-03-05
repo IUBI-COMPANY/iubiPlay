@@ -36,6 +36,7 @@ export interface ListGamesParams {
   search?: string;
   limit?: number;
   offset?: number;
+  categoryId?: string;
 }
 
 export interface GamesSummary {
@@ -72,7 +73,7 @@ async function buildSummary(): Promise<GamesSummary> {
 }
 
 export async function listGames(params: ListGamesParams = {}) {
-  const { status, search, limit = 20, offset = 0 } = params;
+  const { status, search, limit = 20, offset = 0, categoryId } = params;
   const supabase = getSupabaseClient();
 
   let query = supabase
@@ -80,6 +81,23 @@ export async function listGames(params: ListGamesParams = {}) {
     .select('*', { count: 'exact' })
     .order('updated_at', { ascending: false })
     .range(offset, offset + limit - 1);
+
+  if (categoryId) {
+    const { data: links, error: linksError } = await supabase
+      .from('game_categories')
+      .select('game_id')
+      .eq('category_id', categoryId);
+
+    if (linksError) throw new Error(linksError.message);
+
+    const ids = (links ?? []).map((row) => row.game_id as string).filter(Boolean);
+    if (ids.length === 0) {
+      const summary = await buildSummary();
+      return { items: [], total: 0, summary };
+    }
+
+    query = query.in(ID_COLUMN, ids);
+  }
 
   if (status) {
     query = query.eq('status', status);

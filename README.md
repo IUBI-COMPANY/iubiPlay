@@ -55,3 +55,10 @@ Si tu servidor usa otro host/puerto, puedes definir `BASE_URL`:
 $env:BASE_URL = "http://localhost:3000"
 npm run test:games-api
 ```
+
+## Pruebas rapidas
+
+```powershell
+npm run test:games-api
+npm run test:categories-api
+```
