@@ -9,6 +9,7 @@ const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 interface RegisterBody {
   email: string;
   password: string;
+  username: string;
 }
 
 function getClientIp(req: NextRequest): string {
@@ -39,11 +40,18 @@ function parseRegisterBody(data: unknown): RegisterBody | null {
   if (!data || typeof data !== 'object') return null;
   const record = data as Record<string, unknown>;
 
-  if (typeof record.email !== 'string' || typeof record.password !== 'string') return null;
+  if (
+    typeof record.email !== 'string' ||
+    typeof record.password !== 'string' ||
+    typeof record.username !== 'string'
+  ) {
+    return null;
+  }
 
   return {
     email: record.email.trim(),
     password: record.password,
+    username: record.username.trim().toLowerCase(),
   };
 }
 
@@ -66,13 +74,23 @@ export async function POST(req: NextRequest) {
 
     const email = body.email;
     const password = body.password;
+    const username = body.username;
 
-    // Validaciones básicas
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      return NextResponse.json({ ok: false, message: 'Email inválido' }, { status: 400 });
+    // Validaciones basicas
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ ok: false, message: 'Email invalido' }, { status: 400 });
     }
     if (!password || password.length < 8) {
-      return NextResponse.json({ ok: false, message: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, message: 'La contrasena debe tener al menos 8 caracteres' },
+        { status: 400 }
+      );
+    }
+    if (!username || !/^[a-z0-9_]{3,20}$/.test(username)) {
+      return NextResponse.json(
+        { ok: false, message: 'Nombre de usuario invalido' },
+        { status: 400 }
+      );
     }
 
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
@@ -89,9 +107,35 @@ export async function POST(req: NextRequest) {
       auth: { persistSession: false },
     });
 
+    const { data: existingProfile, error: profileLookupError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (profileLookupError) {
+      return NextResponse.json(
+        { ok: false, message: 'No se pudo validar el nombre de usuario' },
+        { status: 500 }
+      );
+    }
+
+    if (existingProfile) {
+      return NextResponse.json(
+        { ok: false, message: 'El nombre de usuario ya existe' },
+        { status: 409 }
+      );
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${req.nextUrl.origin}/api/auth/callback`,
+        data: {
+          username,
+        },
+      },
     });
 
     if (error) {
@@ -101,7 +145,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, message }, { status: 400 });
     }
 
-    const res = NextResponse.json({ ok: true, message: 'Revisa tu correo para continuar' }, { status: 201 });
+    if (!data?.user) {
+      return NextResponse.json(
+        { ok: false, message: 'No se pudo crear el usuario' },
+        { status: 400 }
+      );
+    }
+
+    const res = NextResponse.json(
+      { ok: true, message: 'Revisa tu correo para continuar' },
+      { status: 201 }
+    );
     if (data?.session) {
       setAuthCookies(res, data.session);
     }

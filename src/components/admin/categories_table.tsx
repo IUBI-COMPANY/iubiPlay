@@ -3,6 +3,21 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Category, CategoryType } from '../../types/category';
+import { 
+  Search, 
+  Plus, 
+  Edit3, 
+  Trash2, 
+  ToggleLeft, 
+  ToggleRight,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Layers,
+  CheckCircle2,
+  XCircle
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
 
 type CategoriesResponse = {
   items: Category[];
@@ -10,7 +25,7 @@ type CategoriesResponse = {
 };
 
 const inputClass =
-  'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200';
+  'w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
 
 const PAGE_SIZE = 10;
 
@@ -106,21 +121,26 @@ export function CategoriesTable() {
   };
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Buscar</label>
-          <input
-            className={inputClass}
-            placeholder="Buscar por nombre o slug"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+    <section className="space-y-8">
+      {/* Search and Filters */}
+      <div className="glass-panel p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
+        <div className="flex-1 space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Buscar Categorías</label>
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+            <input
+              className={cn(inputClass, "pl-12 h-12")}
+              placeholder="Nombre o slug..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-        <div className="w-full md:w-56">
-          <label className="block text-sm font-medium">Tipo</label>
+
+        <div className="w-full lg:w-44 space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Tipo</label>
           <select
-            className={inputClass}
+            className={cn(inputClass, "h-12 appearance-none")}
             value={type}
             onChange={(e) => setType(e.target.value as CategoryType | '')}
           >
@@ -129,10 +149,11 @@ export function CategoriesTable() {
             <option value="course">Curso</option>
           </select>
         </div>
-        <div className="w-full md:w-56">
-          <label className="block text-sm font-medium">Estado</label>
+
+        <div className="w-full lg:w-44 space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Estado</label>
           <select
-            className={inputClass}
+            className={cn(inputClass, "h-12 appearance-none")}
             value={isActive}
             onChange={(e) => setIsActive(e.target.value)}
           >
@@ -141,85 +162,143 @@ export function CategoriesTable() {
             <option value="false">Inactivo</option>
           </select>
         </div>
-        <button type="button" onClick={onApplyFilters} className="btn-primary">
-          {loading ? 'Actualizando...' : 'Aplicar'}
+
+        <button
+          onClick={onApplyFilters}
+          className="btn-primary h-12 flex items-center justify-center gap-2 min-w-[120px]"
+        >
+          <Filter size={18} />
+          {loading ? '...' : 'Filtrar'}
         </button>
+
+        <Link
+          href="/admin/categories/new"
+          className="btn-primary h-12 flex items-center justify-center gap-2 bg-linear-to-br from-violet-600 to-indigo-600"
+        >
+          <Plus size={18} />
+          <span>Nueva</span>
+        </Link>
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-sm font-medium">
+          {error}
+        </div>
+      )}
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Slug</th>
-              <th className="px-4 py-2 text-left">Tipo</th>
-              <th className="px-4 py-2 text-left">Estado</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {items.map((category) => (
-              <tr key={category.id}>
-                <td className="px-4 py-2">{category.name}</td>
-                <td className="px-4 py-2">{category.slug}</td>
-                <td className="px-4 py-2">{category.type === 'level' ? 'Nivel' : 'Curso'}</td>
-                <td className="px-4 py-2">{category.is_active ? 'Activo' : 'Inactivo'}</td>
-                <td className="px-4 py-2">
-                  <div className="flex items-center gap-3">
-                    <Link className="text-blue-600" href={`/admin/categories/${category.id}/edit`}>
-                      Editar
-                    </Link>
-                    <button
-                      type="button"
-                      className="text-blue-600"
-                      onClick={() => toggleActive(category)}
-                    >
-                      {category.is_active ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button
-                      type="button"
-                      className="text-red-600"
-                      onClick={() => deleteItem(category)}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {!loading && items.length === 0 && (
+      {/* Table Section */}
+      <div className="card-startup p-0!">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-100 dark:divide-white/5 text-sm">
+            <thead className="bg-slate-50/50 dark:bg-white/2">
               <tr>
-                <td className="px-4 py-6" colSpan={5}>
-                  No hay categorias para mostrar.
-                </td>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Nombre & Info</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 hidden md:table-cell">Slug Identificador</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Tipo</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Estado</th>
+                <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Acciones</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              {items.map((category) => (
+                <tr key={category.id} className="group hover:bg-slate-50/50 dark:hover:bg-white/1 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-violet-500 transition-colors">
+                        <Layers size={18} />
+                      </div>
+                      <span className="font-extrabold text-slate-800 dark:text-white leading-tight">
+                        {category.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 hidden md:table-cell">
+                    <code className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-lg">
+                      {category.slug}
+                    </code>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={cn(
+                      "inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                      category.type === 'level' 
+                        ? "border-blue-500/20 text-blue-600 bg-blue-500/5" 
+                        : "border-orange-500/20 text-orange-600 bg-orange-500/5"
+                    )}>
+                      {category.type === 'level' ? 'Nivel' : 'Curso'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                      category.is_active 
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
+                        : "bg-red-500/10 text-red-600 dark:text-red-400"
+                    )}>
+                      {category.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                      {category.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <Link
+                        href={`/admin/categories/${category.id}/edit`}
+                        className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+                        title="Editar"
+                      >
+                        <Edit3 size={18} />
+                      </Link>
+                      <button
+                        onClick={() => toggleActive(category)}
+                        className={cn(
+                          "p-2 rounded-xl transition-colors",
+                          category.is_active ? "text-amber-500 hover:bg-amber-50" : "text-emerald-500 hover:bg-emerald-50"
+                        )}
+                        title={category.is_active ? 'Desactivar' : 'Activar'}
+                      >
+                        {category.is_active ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
+                      </button>
+                      <button
+                        onClick={() => deleteItem(category)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!loading && items.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                    Sin categorías para mostrar.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Página {page} de {totalPages}
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-2">
+        <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+          Página <span className="text-slate-900 dark:text-white">{page}</span> de {totalPages}
         </p>
         <div className="flex gap-2">
           <button
-            type="button"
-            className="btn-primary"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
+            className="btn-secondary py-2 rounded-xl! disabled:opacity-30"
           >
-            Anterior
+            <ChevronLeft size={18} />
           </button>
           <button
-            type="button"
-            className="btn-primary"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
+            className="btn-primary py-2 rounded-xl! disabled:opacity-30"
           >
-            Siguiente
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>

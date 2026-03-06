@@ -4,6 +4,8 @@ import type { Game, GameStatus } from '@/src/types/game';
 import type { CategorySelections } from '@/src/types/category';
 import { createGame, listGames } from '@/src/lib/db/games';
 import { getCategoriesByGameIds, setGameCategories, validateCategorySelections } from '@/src/lib/db/categories';
+import { getWriteClientFromRequest } from '@/src/lib/supabase/auth';
+import { setAuthCookies } from '@/src/lib/auth/cookies';
 
 function parseStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
@@ -69,6 +71,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await getWriteClientFromRequest(req);
+  if (!auth.client) {
+    return NextResponse.json({ ok: false, message: auth.error ?? 'No autenticado' }, { status: 401 });
+  }
+
   const body = parseCreateBody(await req.json().catch(() => null));
   if (!body) {
     return NextResponse.json({ ok: false, message: 'Body inválido' }, { status: 400 });
@@ -87,25 +94,38 @@ export async function POST(req: NextRequest) {
 
   let selections: CategorySelections;
   try {
+    const authedClient = auth.client;
+
     selections = await validateCategorySelections(
       { levels: body.levels ?? [], courses: body.courses ?? [] },
-      { requireLevels: true, requireCourses: true, requireActive: true }
+      { requireLevels: true, requireCourses: true, requireActive: true },
+      authedClient
     );
+
+    const created = await createGame(
+      {
+        title: body.title,
+        slug: body.slug,
+        redirect_url: body.redirect_url,
+        cover_image_url: body.cover_image_url,
+        platform: body.platform,
+        status: body.status ?? 'draft',
+      },
+      authedClient
+    );
+
+    await setGameCategories(created.id, selections, authedClient);
+
+    const res = NextResponse.json({ ok: true, item: created }, { status: 201 });
+    if (auth.refreshedSession) {
+      setAuthCookies(res, auth.refreshedSession);
+    }
+    return res;
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Categorias invalidas';
-    return NextResponse.json({ ok: false, message }, { status: 400 });
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[api/games] create error', err);
+    }
+    const message = err instanceof Error ? err.message : 'No se pudo guardar el juego';
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
-
-  const created = await createGame({
-    title: body.title,
-    slug: body.slug,
-    redirect_url: body.redirect_url,
-    cover_image_url: body.cover_image_url,
-    platform: body.platform,
-    status: body.status ?? 'draft',
-  });
-
-  await setGameCategories(created.id, selections);
-
-  return NextResponse.json({ ok: true, item: created }, { status: 201 });
 }

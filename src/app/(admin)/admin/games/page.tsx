@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GamesTable } from '@/src/components/admin/games_table';
+import { GamesTable } from '../../../../components/admin/games_table';
 
 export default function AdminGamesPage() {
   return (

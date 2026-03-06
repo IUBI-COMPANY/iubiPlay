@@ -186,8 +186,8 @@ export async function listGames(params: ListGamesParams = {}) {
   }
 }
 
-export async function getGameById(id: string): Promise<Game | null> {
-  const supabase = getSupabaseClient();
+export async function getGameById(id: string, client?: SupabaseClient): Promise<Game | null> {
+  const supabase = client ?? getSupabaseClient();
   const { data, error } = await supabase
     .from('games')
     .select('*')
@@ -197,15 +197,22 @@ export async function getGameById(id: string): Promise<Game | null> {
   return normalizeGame(data as Record<string, unknown>);
 }
 
-export async function createGame(input: Omit<Game, 'id' | 'created_at' | 'updated_at'>): Promise<Game> {
-  const supabase = getSupabaseClient();
+export async function createGame(
+  input: Omit<Game, 'id' | 'created_at' | 'updated_at'>,
+  client?: SupabaseClient
+): Promise<Game> {
+  const supabase = client ?? getSupabaseClient();
   const { data, error } = await supabase.from('games').insert(input).select('*').single();
   if (error || !data) throw new Error(error?.message ?? 'No se pudo crear');
   return normalizeGame(data as Record<string, unknown>);
 }
 
-export async function updateGame(id: string, patch: Partial<Game>): Promise<Game | null> {
-  const supabase = getSupabaseClient();
+export async function updateGame(
+  id: string,
+  patch: Partial<Game>,
+  client?: SupabaseClient
+): Promise<Game | null> {
+  const supabase = client ?? getSupabaseClient();
   const { data, error } = await supabase
     .from('games')
     .update({ ...patch, updated_at: new Date().toISOString() })
@@ -220,8 +227,8 @@ export async function updateGame(id: string, patch: Partial<Game>): Promise<Game
   return data ? normalizeGame(data as Record<string, unknown>) : null;
 }
 
-export async function deleteGame(id: string): Promise<boolean> {
-  const supabase = getSupabaseClient();
+export async function deleteGame(id: string, client?: SupabaseClient): Promise<boolean> {
+  const supabase = client ?? getSupabaseClient();
   const { error, data } = await supabase
     .from('games')
     .delete()
@@ -232,4 +239,3 @@ export async function deleteGame(id: string): Promise<boolean> {
   }
   return Array.isArray(data) && data.length > 0;
 }
-

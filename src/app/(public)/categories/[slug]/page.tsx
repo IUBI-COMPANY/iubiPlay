@@ -26,6 +26,7 @@ type Props = {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { search: searchRaw, page: pageRaw } = (await searchParams) ?? {};
   const category = await getCategoryBySlug(slug);
 
   if (!category) {
@@ -36,8 +37,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     );
   }
 
-  const search = searchParams?.search?.trim() ?? '';
-  const page = Math.max(Number(searchParams?.page ?? 1), 1);
+  const search = searchRaw?.trim() ?? '';
+  const page = Math.max(Number(pageRaw ?? 1), 1);
   const offset = (page - 1) * PAGE_SIZE;
 
   const result = await listGames({
@@ -55,12 +56,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-3">
+      <header className="space-y-1">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-purple-200">Categoria</p>
-          <h1 className="text-2xl font-semibold text-white">{category.name}</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">Categoría</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{category.name}</h1>
         </div>
-        <FiltersBar defaultValue={search} action={`/categories/${category.slug}`} />
+        <div className="pt-2">
+          <FiltersBar defaultValue={search} action={`/categories/${category.slug}`} />
+        </div>
       </header>
 
       {result.items.length === 0 ? (

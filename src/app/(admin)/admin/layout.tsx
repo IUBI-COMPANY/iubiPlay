@@ -1,10 +1,10 @@
+import React from 'react';
+import { AdminShell } from '@/src/components/admin/admin_shell';
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <section>
-      <header>
-        <h1>Admin Panel</h1>
-      </header>
+    <AdminShell>
       {children}
-    </section>
+    </AdminShell>
   );
 }

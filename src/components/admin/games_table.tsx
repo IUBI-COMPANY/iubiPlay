@@ -4,6 +4,24 @@ import React from 'react';
 import Link from 'next/link';
 import type { Game } from '../../types/game';
 import type { Category } from '../../types/category';
+import { 
+  Plus, 
+  Search, 
+  Sparkles, 
+  Trash2, 
+  Edit3, 
+  Eye, 
+  EyeOff,
+  Clock,
+  CheckCircle2,
+  Archive,
+  Filter,
+  LogOut,
+  ChevronRight,
+  ChevronLeft,
+  Gamepad2
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
 
 type GamesResponse = {
   items: Game[];
@@ -18,9 +36,11 @@ type GamesResponse = {
 };
 
 const inputClass =
-  'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200';
+  'w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
 
 const PAGE_SIZE = 10;
+const CATEGORIES_CACHE_KEY = 'iubiplay:categories:active';
+const CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export function GamesTable() {
   const [items, setItems] = React.useState<Game[]>([]);
@@ -33,7 +53,7 @@ export function GamesTable() {
   const [total, setTotal] = React.useState(0);
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('');
-  const [categoryId, setCategoryId] = React.useState('');
+  const [categoryIds, setCategoryIds] = React.useState<string[]>([]);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [page, setPage] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
@@ -44,10 +64,29 @@ export function GamesTable() {
 
   const loadCategories = React.useCallback(async () => {
     try {
+      if (typeof window !== 'undefined') {
+        const cached = window.sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached) as { ts: number; items: Category[] };
+          if (Date.now() - parsed.ts < CATEGORIES_CACHE_TTL_MS) {
+            setCategories(Array.isArray(parsed.items) ? parsed.items : []);
+            return;
+          }
+        }
+      }
+
       const res = await fetch('/api/categories?is_active=true&limit=500');
       if (!res.ok) return;
       const data = (await res.json()) as { items: Category[] };
-      setCategories(Array.isArray(data.items) ? data.items : []);
+      const items = Array.isArray(data.items) ? data.items : [];
+      setCategories(items);
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(
+          CATEGORIES_CACHE_KEY,
+          JSON.stringify({ ts: Date.now(), items })
+        );
+      }
     } catch {
       // ignore
     }
@@ -60,7 +99,7 @@ export function GamesTable() {
       const params = new URLSearchParams();
       if (search.trim()) params.set('search', search.trim());
       if (status) params.set('status', status);
-      if (categoryId) params.set('category_id', categoryId);
+      if (categoryIds.length) params.set('category_ids', categoryIds.join(','));
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String((page - 1) * PAGE_SIZE));
 
@@ -82,7 +121,7 @@ export function GamesTable() {
     } finally {
       setLoading(false);
     }
-  }, [search, status, categoryId, page]);
+  }, [search, status, categoryIds, page]);
 
   React.useEffect(() => {
     void loadCategories();
@@ -141,7 +180,7 @@ export function GamesTable() {
 
   const getCategoryLabel = (gameId: string) => {
     const gameCategories = categoriesByGameId[gameId] ?? [];
-    if (gameCategories.length === 0) return 'Sin categorias';
+    if (gameCategories.length === 0) return 'Sin categorías';
     const levels = gameCategories.filter((cat) => cat.type === 'level').map((cat) => cat.name);
     const courses = gameCategories.filter((cat) => cat.type === 'course').map((cat) => cat.name);
     const parts: string[] = [];
@@ -151,40 +190,48 @@ export function GamesTable() {
   };
 
   return (
-    <section className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-md border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">Total</p>
-          <p className="text-2xl font-semibold">{summary.total}</p>
-        </div>
-        <div className="rounded-md border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">Publicados</p>
-          <p className="text-2xl font-semibold">{summary.published}</p>
-        </div>
-        <div className="rounded-md border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">Borradores</p>
-          <p className="text-2xl font-semibold">{summary.draft}</p>
-        </div>
-        <div className="rounded-md border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">Archivados</p>
-          <p className="text-2xl font-semibold">{summary.archived}</p>
-        </div>
+    <section className="space-y-8">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+        {[
+          { label: 'Total recursos', value: summary.total, color: 'text-violet-600', icon: Gamepad2 },
+          { label: 'Publicados', value: summary.published, color: 'text-emerald-500', icon: CheckCircle2 },
+          { label: 'Borradores', value: summary.draft, color: 'text-amber-500', icon: Clock },
+          { label: 'Archivados', value: summary.archived, color: 'text-slate-400', icon: Archive },
+        ].map((stat) => (
+          <div key={stat.label} className="card-startup">
+            <div className="card-startup-inner !gap-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  {stat.label}
+                </p>
+                <stat.icon size={14} className="text-slate-300 dark:text-slate-600" />
+              </div>
+              <p className={cn("text-3xl font-black tracking-tight", stat.color)}>{stat.value}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-end">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Buscar</label>
-          <input
-            className={inputClass}
-            placeholder="Buscar por titulo o slug"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      {/* Filters Bar */}
+      <div className="glass-panel p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
+        <div className="flex-1 space-y-2">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Búsqueda rápida</label>
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+            <input
+              className={cn(inputClass, "pl-12 h-12")}
+              placeholder="Escribe título o slug..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-        <div className="w-full md:w-56">
-          <label className="block text-sm font-medium">Estado</label>
+        
+        <div className="w-full lg:w-48 space-y-2">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Estado</label>
           <select
-            className={inputClass}
+            className={cn(inputClass, "h-12 appearance-none")}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -194,109 +241,159 @@ export function GamesTable() {
             <option value="archived">Archivado</option>
           </select>
         </div>
-        <div className="w-full md:w-64">
-          <label className="block text-sm font-medium">Categoria</label>
-          <select
-            className={inputClass}
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">Todas</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.type === 'level' ? 'Nivel' : 'Curso'}: {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
+
         <button
-          type="button"
           onClick={onApplyFilters}
-          className="btn-primary"
+          disabled={loading}
+          className="btn-primary h-12 flex items-center justify-center gap-2 group min-w-[140px]"
         >
-          {loading ? 'Actualizando...' : 'Aplicar'}
+          {loading ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          ) : (
+            <>
+              <Filter size={18} className="transition-transform group-hover:rotate-12" />
+              <span>Filtrar</span>
+            </>
+          )}
         </button>
+
+        <Link
+          href="/admin/games/new"
+          className="btn-primary h-12 flex items-center justify-center gap-2 bg-linear-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20"
+        >
+          <Plus size={18} />
+          <span>Nuevo recurso</span>
+        </Link>
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-sm font-medium animate-shake">
+          {error}
+        </div>
+      )}
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left">Titulo</th>
-              <th className="px-4 py-2 text-left">Slug</th>
-              <th className="px-4 py-2 text-left">Categorias</th>
-              <th className="px-4 py-2 text-left">Estado</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {items.map((game) => (
-              <tr key={game.id}>
-                <td className="px-4 py-2">{game.title}</td>
-                <td className="px-4 py-2">{game.slug}</td>
-                <td className="px-4 py-2 text-xs text-gray-700">{getCategoryLabel(game.id)}</td>
-                <td className="px-4 py-2">{game.status}</td>
-                <td className="px-4 py-2">
-                  <div className="flex items-center gap-3">
-                    <Link
-                      className="text-blue-600"
-                      href={`/admin/games/${game.id}/edit`}
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      type="button"
-                      className="text-blue-600"
-                      onClick={() => togglePublish(game)}
-                      disabled={!game.id}
-                    >
-                      {game.status === 'published' ? 'Despublicar' : 'Publicar'}
-                    </button>
-                    <button
-                      type="button"
-                      className="text-red-600"
-                      onClick={() => deleteItem(game)}
-                      disabled={!game.id}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {!loading && items.length === 0 && (
+      {/* Table Section */}
+      <div className="card-startup !p-0">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-100 dark:divide-white/5 text-sm">
+            <thead className="bg-slate-50/50 dark:bg-white/2">
               <tr>
-                <td className="px-4 py-6" colSpan={5}>
-                  No hay juegos para mostrar.
-                </td>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Media</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Recurso & Info</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 hidden md:table-cell">Identificador</th>
+                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Estado</th>
+                <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Acciones</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              {items.map((game) => (
+                <tr key={game.id} className="group hover:bg-slate-50/50 dark:hover:bg-white/1 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="relative h-12 w-20 overflow-hidden rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                      <img
+                        src={game.cover_image_url || '/file.svg'}
+                        alt={game.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = '/file.svg'; }}
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-extrabold text-slate-800 dark:text-white group-hover:text-violet-600 transition-colors">
+                        {game.title}
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-400 line-clamp-1 italic">
+                        {getCategoryLabel(game.id || '')}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 hidden md:table-cell">
+                    <code className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-lg">
+                      {game.slug}
+                    </code>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                      game.status === 'published' 
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
+                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    )}>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", game.status === 'published' ? "bg-emerald-500" : "bg-amber-500")} />
+                      {game.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-1 translate-x-2 opacity-60 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                      <Link
+                        href={`/admin/games/${game.id}/edit`}
+                        className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+                        title="Editar"
+                      >
+                        <Edit3 size={18} />
+                      </Link>
+                      <button
+                        onClick={() => togglePublish(game)}
+                        className={cn(
+                          "p-2 rounded-xl transition-colors",
+                          game.status === 'published' 
+                            ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10" 
+                            : "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                        )}
+                        title={game.status === 'published' ? 'Despublicar' : 'Publicar'}
+                      >
+                        {game.status === 'published' ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                      <button
+                        onClick={() => deleteItem(game)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!loading && items.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                    No se encontraron recursos disponibles.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Página {page} de {totalPages}
-        </p>
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+            Página <span className="text-slate-900 dark:text-white leading-none inline-block align-middle">{page}</span>
+          </p>
+          <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-white/10" />
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+            Total {totalPages}
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
-            type="button"
-            className="btn-primary"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
+            className="btn-secondary py-2 !rounded-xl disabled:opacity-30"
           >
-            Anterior
+            <ChevronLeft size={18} />
           </button>
           <button
-            type="button"
-            className="btn-primary"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
+            className="btn-primary py-2 !rounded-xl disabled:opacity-30"
           >
-            Siguiente
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>

@@ -36,6 +36,14 @@ export async function POST(req: NextRequest) {
     });
 
     if (error || !data.session) {
+      const isUnconfirmed = error?.message?.toLowerCase().includes('email not confirmed');
+      if (isUnconfirmed) {
+        return NextResponse.json(
+          { ok: false, message: 'Debes confirmar tu correo antes de iniciar sesión' },
+          { status: 403 }
+        );
+      }
+
       const message = process.env.NODE_ENV !== 'production'
         ? error?.message ?? 'Login fallido'
         : 'Credenciales inválidas';

@@ -62,3 +62,46 @@ npm run test:games-api
 npm run test:games-api
 npm run test:categories-api
 ```
+
+## Scraping de metadatos (Open Graph)
+
+Puedes obtener titulo, descripcion e imagen desde un enlace usando el script CLI.
+
+```bash
+yarn scrape:game --url=https://example.com
+```
+
+Si el sitio no expone descripcion o imagen en Open Graph, el script usa un fallback de HTML
+(meta description + primera imagen de contenido). Para permitir logos, usa:
+
+```bash
+yarn scrape:game --url=https://example.com --allow-logo
+```
+
+Salida esperada (JSON):
+
+```json
+{
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "description": "...",
+  "image": null,
+  "siteName": "...",
+  "canonical": "https://example.com",
+  "type": "website"
+}
+```
+
+## Autocompletar juegos desde link
+
+En el formulario de juegos del panel admin, pega la URL en "URL de redirección" y presiona
+"Autocompletar". Se llenan titulo, slug, cover y se sugieren niveles/cursos.
+
+## Configuracion para escrituras en admin
+
+Para operaciones de escritura (crear/editar/eliminar juegos) el backend requiere la variable
+`SUPABASE_SERVICE_ROLE_KEY` en el entorno del servidor. Ejemplo en `.env.local`:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+```

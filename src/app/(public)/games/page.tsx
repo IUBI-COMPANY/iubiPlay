@@ -23,8 +23,9 @@ type Props = {
 };
 
 export default async function GamesPage({ searchParams }: Props) {
-  const search = searchParams?.search?.trim() ?? '';
-  const page = Math.max(Number(searchParams?.page ?? 1), 1);
+  const { search: searchRaw, page: pageRaw } = (await searchParams) ?? {};
+  const search = searchRaw?.trim() ?? '';
+  const page = Math.max(Number(pageRaw ?? 1), 1);
   const offset = (page - 1) * PAGE_SIZE;
 
   const result = await listGames({

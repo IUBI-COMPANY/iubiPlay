@@ -6,12 +6,19 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 const schema = yup.object({
-  email: yup.string().trim().required('Email requerido').email('Email inválido'),
-  password: yup.string().required('Contraseña requerida').min(8, 'Mínimo 8 caracteres'),
+  username: yup
+    .string()
+    .transform((value) => value.trim().toLowerCase())
+    .required('Nombre de usuario requerido')
+    .min(3, 'Minimo 3 caracteres')
+    .max(20, 'Maximo 20 caracteres')
+    .matches(/^[a-z0-9_]+$/, 'Solo letras, numeros y guion bajo'),
+  email: yup.string().trim().required('Email requerido').email('Email invalido'),
+  password: yup.string().required('Contrasena requerida').min(8, 'Minimo 8 caracteres'),
   confirmPassword: yup
     .string()
-    .required('Confirma tu contraseña')
-    .oneOf([yup.ref('password')], 'Las contraseñas no coinciden'),
+    .required('Confirma tu contrasena')
+    .oneOf([yup.ref('password')], 'Las contrasenas no coinciden'),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -42,7 +49,11 @@ export default function RegisterForm() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: values.email, password: values.password }),
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        }),
       });
       const json = (await res.json()) as { ok?: boolean; message?: string };
 
@@ -56,6 +67,13 @@ export default function RegisterForm() {
       setMessageError('Error al registrar');
     }
   };
+
+  const usernameRegister = register('username', {
+    onChange: () => {
+      if (messageError) setMessageError(null);
+      if (errors.username) clearErrors('username');
+    },
+  });
 
   const emailRegister = register('email', {
     onChange: () => {
@@ -90,6 +108,24 @@ export default function RegisterForm() {
           {messageSuccess}
         </div>
       )}
+
+      <div>
+        <label htmlFor="register-username" className="block text-sm font-medium">
+          Nombre de usuario
+        </label>
+        <input
+          id="register-username"
+          type="text"
+          className={inputClass}
+          autoComplete="username"
+          required
+          {...usernameRegister}
+          aria-invalid={!!errors.username}
+        />
+        {errors.username && (
+          <p className="text-sm text-red-600">{errors.username.message}</p>
+        )}
+      </div>
 
       <div>
         <label htmlFor="register-email" className="block text-sm font-medium">

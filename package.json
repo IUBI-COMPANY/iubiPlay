@@ -8,15 +8,22 @@
     "start": "next start",
     "lint": "eslint",
     "test:games-api": "node scripts/test-games-api.mjs",
-    "test:categories-api": "node scripts/test-categories-api.mjs"
+    "test:categories-api": "node scripts/test-categories-api.mjs",
+    "scrape:game": "node scripts/scrape-game.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.2.0",
     "@supabase/supabase-js": "^2.98.0",
+    "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.35.0",
+    "lucide-react": "^0.577.0",
     "next": "16.1.6",
+    "open-graph-scraper": "^6.10.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
+    "tailwind-merge": "^3.5.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {
