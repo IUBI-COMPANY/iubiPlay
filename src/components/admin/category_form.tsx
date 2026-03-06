@@ -6,6 +6,17 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 import type { Category } from '../../types/category';
+import { 
+  Plus, 
+  ArrowLeft, 
+  Layers, 
+  LayoutGrid, 
+  AlignLeft, 
+  ListOrdered, 
+  CheckCircle2, 
+  AlertCircle 
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
 
 const schema = yup.object({
   name: yup.string().trim().required('Nombre requerido'),
@@ -30,7 +41,7 @@ interface CategoryFormProps {
 }
 
 const inputClass =
-  'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200';
+  'block w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
 
 const DEFAULT_VALUES: FormData = {
   name: '',
@@ -97,60 +108,126 @@ export function CategoryForm({ mode = 'create', categoryId, initialData }: Categ
         return;
       }
 
-      setMessageSuccess(mode === 'edit' ? 'Categoria actualizada' : 'Categoria creada');
-      router.push('/admin/categories');
+      setMessageSuccess(mode === 'edit' ? 'Categoría actualizada correctamente' : 'Categoría creada correctamente');
+      setTimeout(() => {
+        router.push('/admin/categories');
+      }, 1500);
     } catch {
-      setMessageError('Error al guardar la categoria');
+      setMessageError('Error al intentar guardar la categoría');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      {messageError && <p className="text-red-600">{messageError}</p>}
-      {messageSuccess && <p className="text-green-600">{messageSuccess}</p>}
-
-      <div>
-        <label className="block text-sm font-medium">Nombre</label>
-        <input className={inputClass} {...register('name')} />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Slug</label>
-        <input className={inputClass} {...register('slug')} />
-        {errors.slug && <p className="text-sm text-red-600">{errors.slug.message}</p>}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Tipo</label>
-        <select className={inputClass} {...register('type')}>
-          <option value="level">Nivel</option>
-          <option value="course">Curso</option>
-        </select>
-        {errors.type && <p className="text-sm text-red-600">{errors.type.message}</p>}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Descripción</label>
-        <textarea className={inputClass} rows={3} {...register('description')} />
-        {errors.description && <p className="text-sm text-red-600">{errors.description.message}</p>}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Orden</label>
-        <input className={inputClass} type="number" {...register('sort_order')} />
-        {errors.sort_order && <p className="text-sm text-red-600">{errors.sort_order.message}</p>}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <input type="checkbox" className="h-4 w-4" {...register('is_active')} />
-        <label className="text-sm">Activo</label>
-      </div>
-
-      <div>
-        <button type="submit" className="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Actualizar categoria' : 'Crear categoria'}
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto pb-12" noValidate>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+            {mode === 'edit' ? 'Editar Categoría' : 'Nueva Categoría'}
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">Define niveles educativos o cursos específicos.</p>
+        </div>
+        <button 
+          type="button" 
+          onClick={() => router.back()}
+          className="flex items-center gap-2 p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 text-sm font-bold transition-all"
+        >
+          <ArrowLeft size={18} />
+          Volver
         </button>
+      </div>
+
+      <div className="card-startup p-8!">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Nombre de la categoría</label>
+              <div className="relative group">
+                <LayoutGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+                <input className={cn(inputClass, "pl-12")} placeholder="Ej. Primaria o Matemáticas" {...register('name')} />
+              </div>
+              {errors.name && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.name.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Slug identificador</label>
+              <input className={inputClass} placeholder="ej-primaria" {...register('slug')} />
+              {errors.slug && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.slug.message}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Tipo de categoría</label>
+              <div className="relative group">
+                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors pointer-events-none" size={18} />
+                <select className={cn(inputClass, "pl-12 appearance-none")} {...register('type')}>
+                  <option value="level">Nivel Educativo</option>
+                  <option value="course">Curso / Materia</option>
+                </select>
+              </div>
+              {errors.type && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.type.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Orden de visualización</label>
+              <div className="relative group">
+                <ListOrdered className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+                <input className={cn(inputClass, "pl-12")} type="number" placeholder="0" {...register('sort_order')} />
+              </div>
+              {errors.sort_order && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.sort_order.message}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Descripción (Opcional)</label>
+            <div className="relative group">
+              <AlignLeft className="absolute left-4 top-4 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+              <textarea className={cn(inputClass, "pl-12 resize-none")} rows={3} placeholder="Breve descripción de la categoría..." {...register('description')} />
+            </div>
+            {errors.description && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.description.message}</p>}
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 dark:border-white/5">
+            <label className="inline-flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <input type="checkbox" className="sr-only peer" {...register('is_active')} />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500 transition-colors"></div>
+              </div>
+              <span className="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Categoría activa</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        <button 
+          type="submit" 
+          className="w-full btn-primary h-14 flex items-center justify-center gap-3 text-base shadow-xl shadow-violet-500/20 active:scale-[0.98] transition-all"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          ) : (
+            <>
+              <Plus size={20} />
+              <span>{mode === 'edit' ? 'Guardar Cambios' : 'Crear Categoría'}</span>
+            </>
+          )}
+        </button>
+        
+        {messageSuccess && (
+          <div className="flex items-center gap-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-sm font-bold animate-in fade-in slide-in-from-top-4">
+            <CheckCircle2 size={18} />
+            {messageSuccess}
+          </div>
+        )}
+        
+        {messageError && (
+          <div className="flex items-center gap-2 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 text-sm font-bold animate-shake">
+            <AlertCircle size={18} />
+            {messageError}
+          </div>
+        )}
       </div>
     </form>
   );

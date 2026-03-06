@@ -1,15 +1,20 @@
 import { GameForm } from '@/src/components/admin/game_form';
 import { getGameById } from '@/src/lib/db/games';
 import { getGameCategorySelections } from '@/src/lib/db/categories';
+import { getServerSupabaseClientFromCookies } from '@/src/lib/supabase/server';
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditGamePage({ params }: Props) {
   const { id } = await params;
-  const [game, selections] = await Promise.all([
-    getGameById(id),
-    getGameCategorySelections(id),
-  ]);
+  const authedClient = await getServerSupabaseClientFromCookies();
+
+  const [game, selections] = authedClient
+    ? await Promise.all([
+        getGameById(id, authedClient),
+        getGameCategorySelections(id, authedClient),
+      ])
+    : await Promise.all([getGameById(id), getGameCategorySelections(id)]);
 
   if (!game) {
     return (

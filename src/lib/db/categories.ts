@@ -48,7 +48,8 @@ export interface ValidateSelectionsOptions {
 
 export async function validateCategorySelections(
   selections: CategorySelections,
-  options: ValidateSelectionsOptions = {}
+  options: ValidateSelectionsOptions = {},
+  client?: SupabaseClient
 ): Promise<CategorySelections> {
   const { requireLevels = false, requireCourses = false, requireActive = false } = options;
   const combined = [...(selections.levels ?? []), ...(selections.courses ?? [])];
@@ -65,7 +66,7 @@ export async function validateCategorySelections(
     return { levels: [], courses: [] };
   }
 
-  const supabase = getSupabaseClient();
+  const supabase = client ?? getSupabaseClient();
   const { data, error } = await supabase
     .from('categories')
     .select('id,type,is_active')
@@ -189,10 +190,11 @@ export async function deleteCategory(id: string): Promise<boolean> {
 
 export async function setGameCategories(
   gameId: string,
-  selections: CategorySelections
+  selections: CategorySelections,
+  client?: SupabaseClient
 ): Promise<void> {
   if (!gameId) return;
-  const supabase = getSupabaseClient();
+  const supabase = client ?? getSupabaseClient();
   const combined = [...(selections.levels ?? []), ...(selections.courses ?? [])];
   const uniqueIds = Array.from(new Set(combined)).filter(Boolean);
 
@@ -206,8 +208,16 @@ export async function setGameCategories(
   if (insertError) throw new Error(insertError.message);
 }
 
-export async function getGameCategorySelections(gameId: string): Promise<CategorySelections> {
-  const supabase = getSupabaseClient();
+export async function getGameCategorySelections(gameId: string): Promise<CategorySelections>;
+export async function getGameCategorySelections(
+  gameId: string,
+  client: SupabaseClient
+): Promise<CategorySelections>;
+export async function getGameCategorySelections(
+  gameId: string,
+  client?: SupabaseClient
+): Promise<CategorySelections> {
+  const supabase = client ?? getSupabaseClient();
   const { data: links, error } = await supabase
     .from('game_categories')
     .select('category_id')

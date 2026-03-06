@@ -1,4 +1,4 @@
-import { GameForm } from '@/src/components/admin/game_form';
+import { GameForm } from '../../../../../components/admin/game_form';
 
 export default function NewGamePage() {
   return (

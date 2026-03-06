@@ -41,3 +41,4 @@ export function getBrowserSupabaseClient(): SupabaseClient {
     return browserSupabase;
 }
 
+

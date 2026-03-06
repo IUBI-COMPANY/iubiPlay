@@ -5,6 +5,10 @@ import { deleteGame, getGameById, updateGame } from "@/src/lib/db/games";
 import type { CategorySelections } from "@/src/types/category";
 import { setGameCategories } from "@/src/lib/db/categories";
 import { validateCategorySelections } from "@/src/lib/db/categories";
+import { getWriteClientFromRequest } from "@/src/lib/supabase/auth";
+import { setAuthCookies } from "@/src/lib/auth/cookies";
+
+const ACCESS_TOKEN_COOKIE = "sb-access-token";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -66,6 +70,12 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       { status: 400 }
     );
   }
+
+  const auth = await getWriteClientFromRequest(req);
+  if (!auth.client) {
+    return NextResponse.json({ ok: false, message: auth.error ?? "No autenticado" }, { status: 401 });
+  }
+
   const body = parsePatchBody(await req.json().catch(() => null));
   if (!body) {
     return NextResponse.json(
@@ -101,9 +111,12 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   let selections: CategorySelections | undefined;
   if (body.levels && body.courses) {
     try {
+      const authedClient = auth.client;
+
       selections = await validateCategorySelections(
         { levels: body.levels, courses: body.courses },
-        { requireLevels: true, requireCourses: true, requireActive: true }
+        { requireLevels: true, requireCourses: true, requireActive: true },
+        authedClient
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Categorias invalidas";
@@ -112,11 +125,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   }
 
   try {
+    const authedClient = auth.client;
+
     const gamePatch = {
       status: body.status,
       title: body.title,
     };
-    const updated = await updateGame(id, gamePatch);
+    const updated = await updateGame(id, gamePatch, authedClient);
     if (!updated) {
       return NextResponse.json(
         { ok: false, message: "No encontrado" },
@@ -125,10 +140,14 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
 
     if (selections) {
-      await setGameCategories(id, selections);
+      await setGameCategories(id, selections, authedClient);
     }
 
-    return NextResponse.json({ ok: true, item: updated });
+    const res = NextResponse.json({ ok: true, item: updated });
+    if (auth.refreshedSession) {
+      setAuthCookies(res, auth.refreshedSession);
+    }
+    return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Error interno";
     return NextResponse.json(
@@ -138,7 +157,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   }
 }
 
-export async function DELETE(_: NextRequest, { params }: Ctx) {
+export async function DELETE(req: NextRequest, { params }: Ctx) {
   const { id } = await params;
   if (!id) {
     return NextResponse.json(
@@ -146,15 +165,27 @@ export async function DELETE(_: NextRequest, { params }: Ctx) {
       { status: 400 }
     );
   }
+
+  const auth = await getWriteClientFromRequest(req);
+  if (!auth.client) {
+    return NextResponse.json({ ok: false, message: auth.error ?? "No autenticado" }, { status: 401 });
+  }
+
+  const authedClient = auth.client;
+
   try {
-    const deleted = await deleteGame(id);
+    const deleted = await deleteGame(id, authedClient);
     if (!deleted) {
       return NextResponse.json(
         { ok: false, message: "No encontrado" },
         { status: 404 }
       );
     }
-    return NextResponse.json({ ok: true, deleted: true });
+    const res = NextResponse.json({ ok: true, deleted: true });
+    if (auth.refreshedSession) {
+      setAuthCookies(res, auth.refreshedSession);
+    }
+    return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Error interno";
     return NextResponse.json(
