@@ -17,12 +17,26 @@ import {
   LayoutDashboard,
   SearchIcon,
   Moon,
-  Sun
+  Sun,
+  BookText,
+  Calculator,
+  FlaskConical,
+  Languages,
+  Palette,
+  Library,
+  Globe,
+  Music,
+  Dumbbell,
+  Users,
+  Heart,
+  Atom,
+  Beaker,
+  Radical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/src/lib/utils';
 
-type NavItem = { label: string; href: string };
+type NavItem = { label: string; href: string; icon?: string };
 
 type Props = {
   children: React.ReactNode;
@@ -93,12 +107,55 @@ export function PublicShell({ children, navItems }: Props) {
   const displayName = authUser?.username ?? authUser?.email ?? null;
 
   // Function to get icon based on item label
-  const getIcon = (label: string) => {
+  const getIcon = (label: string, iconName?: string) => {
+    const iconsMap: Record<string, React.ReactNode> = {
+      'LayoutDashboard': <LayoutDashboard size={18} />,
+      'Rocket': <Rocket size={18} />,
+      'GraduationCap': <GraduationCap size={18} />,
+      'BookText': <BookText size={18} />,
+      'Calculator': <Calculator size={18} />,
+      'FlaskConical': <FlaskConical size={18} />,
+      'Languages': <Languages size={18} />,
+      'Palette': <Palette size={18} />,
+      'Library': <Library size={18} />,
+      'Globe': <Globe size={18} />,
+      'Music': <Music size={18} />,
+      'Dumbbell': <Dumbbell size={18} />,
+      'Users': <Users size={18} />,
+      'Heart': <Heart size={18} />,
+      'Atom': <Atom size={18} />,
+      'Beaker': <Beaker size={18} />,
+      'Radical': <Radical size={18} />,
+    };
+
+    if (iconName && iconsMap[iconName]) {
+      return iconsMap[iconName];
+    }
+
     const l = label.toLowerCase();
-    if (l.includes('principal') || l.includes('home')) return <LayoutDashboard size={18} />;
-    if (l.includes('herramienta') || l.includes('games')) return <Rocket size={18} />;
-    if (l.includes('estudio') || l.includes('course')) return <GraduationCap size={18} />;
-    return <Gamepad2 size={18} />;
+    
+    // Iconos de navegación principal
+    if (l.includes('principal') || l.includes('home')) return iconsMap['LayoutDashboard'];
+    if (l.includes('herramienta') || l.includes('games')) return iconsMap['Rocket'];
+    if (l.includes('estudio')) return iconsMap['GraduationCap'];
+    
+    // Mapeo inteligente por palabras clave para CURSOS
+    if (l.includes('personal')) return iconsMap['Heart'];
+    if (l.includes('sociales') || l.includes('social') || l.includes('society')) return iconsMap['Users'];
+    if (l.includes('comunicacion') || l.includes('lenguaje') || l.includes('letras') || l.includes('spanish')) return iconsMap['BookText'];
+    if (l.includes('matematica') || l.includes('math') || l.includes('numeros') || l.includes('logica')) return iconsMap['Radical'];
+    if (l.includes('fisica')) return iconsMap['Atom'];
+    if (l.includes('quimica')) return iconsMap['Beaker'];
+    if (l.includes('ciencia') || l.includes('ambiente') || l.includes('nature')) return iconsMap['FlaskConical'];
+    if (l.includes('ingles') || l.includes('english') || l.includes('idioma')) return iconsMap['Languages'];
+    if (l.includes('arte') || l.includes('dibujo') || l.includes('plastica')) return iconsMap['Palette'];
+    if (l.includes('historia')) return iconsMap['Library'];
+    if (l.includes('geografia')) return iconsMap['Globe'];
+    if (l.includes('música') || l.includes('music')) return iconsMap['Music'];
+    if (l.includes('física') || l.includes('deporte') || l.includes('gym')) return iconsMap['Dumbbell'];
+    
+    // Fallback genérico para cursos si no hay coincidencia
+    return iconsMap['GraduationCap'];
   };
 
   return (
@@ -126,7 +183,7 @@ export function PublicShell({ children, navItems }: Props) {
                   isActive && "active"
                 )}
               >
-                {getIcon(item.label)}
+                {getIcon(item.label, item.icon)}
                 {item.label}
               </Link>
             );
@@ -258,7 +315,7 @@ export function PublicShell({ children, navItems }: Props) {
                         pathname === item.href && "active"
                       )}
                     >
-                      {getIcon(item.label)}
+                      {getIcon(item.label, item.icon)}
                       {item.label}
                     </Link>
                   ))}

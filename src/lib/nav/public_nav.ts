@@ -1,6 +1,6 @@
 import { listCategories } from '@/src/lib/db/categories';
 
-export type PublicNavItem = { label: string; href: string };
+export type PublicNavItem = { label: string; href: string; icon?: string };
 
 const BASE_ITEMS: PublicNavItem[] = [
   { label: 'Principal', href: '/' },
@@ -14,9 +14,10 @@ export async function getPublicNavItems(): Promise<PublicNavItem[]> {
     limit: 12,
   });
 
-  const categoryItems = categories.map((category) => ({
+  const categoryItems: PublicNavItem[] = categories.map((category) => ({
     label: category.name,
     href: `/categories/${category.slug}`,
+    icon: category.icon,
   }));
 
   return [BASE_ITEMS[0], ...categoryItems, BASE_ITEMS[1]];

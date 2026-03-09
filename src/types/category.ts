@@ -9,6 +9,7 @@ export interface Category {
     type: CategoryType;
 
     description?: string;
+    icon?: string;
     is_active?: boolean;
     sort_order?: number;
 

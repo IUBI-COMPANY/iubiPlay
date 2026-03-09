@@ -14,7 +14,8 @@ import {
   AlignLeft, 
   ListOrdered, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -23,6 +24,7 @@ const schema = yup.object({
   slug: yup.string().trim().required('Slug requerido'),
   type: yup.string().oneOf(['level', 'course']).required('Tipo requerido'),
   description: yup.string().trim().optional(),
+  icon: yup.string().trim().optional(),
   is_active: yup.boolean().default(true),
   sort_order: yup.number().integer().min(0).optional().transform((value, original) => {
     if (original === '' || original === null || Number.isNaN(value)) return undefined;
@@ -58,6 +60,7 @@ function toFormValues(data?: Partial<Category> | null): FormData {
     slug: data?.slug ?? DEFAULT_VALUES.slug,
     type: data?.type ?? DEFAULT_VALUES.type,
     description: data?.description ?? DEFAULT_VALUES.description,
+    icon: data?.icon ?? '',
     is_active: data?.is_active ?? DEFAULT_VALUES.is_active,
     sort_order: typeof data?.sort_order === 'number' ? data.sort_order : DEFAULT_VALUES.sort_order,
   };
@@ -176,6 +179,20 @@ export function CategoryForm({ mode = 'create', categoryId, initialData }: Categ
               </div>
               {errors.sort_order && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.sort_order.message}</p>}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Icono Lucide (Opcional)</label>
+            <div className="relative group">
+              <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors" size={18} />
+              <input 
+                className={cn(inputClass, "pl-12")} 
+                placeholder="Ej: BookText, Calculator, FlaskConical..." 
+                {...register('icon')} 
+              />
+            </div>
+            <p className="text-[9px] text-slate-400 px-1">Usa nombres de Lucide React (ej: Music, Palette, Globe).</p>
+            {errors.icon && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.icon.message}</p>}
           </div>
 
           <div className="space-y-2">
