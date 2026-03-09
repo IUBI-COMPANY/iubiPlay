@@ -200,7 +200,7 @@ export function GamesTable() {
           { label: 'Archivados', value: summary.archived, color: 'text-slate-400', icon: Archive },
         ].map((stat) => (
           <div key={stat.label} className="card-startup">
-            <div className="card-startup-inner !gap-2">
+            <div className="card-startup-inner gap-2!">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                   {stat.label}
@@ -273,7 +273,7 @@ export function GamesTable() {
       )}
 
       {/* Table Section */}
-      <div className="card-startup !p-0">
+      <div className="card-startup p-0!">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-100 dark:divide-white/5 text-sm">
             <thead className="bg-slate-50/50 dark:bg-white/2">
@@ -384,14 +384,14 @@ export function GamesTable() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="btn-secondary py-2 !rounded-xl disabled:opacity-30"
+            className="btn-secondary py-2 rounded-xl! disabled:opacity-30"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="btn-primary py-2 !rounded-xl disabled:opacity-30"
+            className="btn-primary py-2 rounded-xl! disabled:opacity-30"
           >
             <ChevronRight size={18} />
           </button>

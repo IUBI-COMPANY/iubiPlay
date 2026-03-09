@@ -116,7 +116,7 @@ export function AdminShell({ children }: Props) {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] dark:bg-[#020617]">
+    <div className="flex min-h-screen bg-surface-muted dark:bg-[#020617]">
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-50 w-64 border-r border-slate-200/50 dark:border-white/5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl hidden md:flex flex-col">
         <SidebarContent />

@@ -27,7 +27,7 @@ export function GameHero({ game }: Props) {
   const heroImage = game.hero_image_url || game.cover_image_url || fallbackCover;
 
   return (
-    <section className="group relative min-h-[400px] md:min-h-[450px] overflow-hidden rounded-[2.5rem] bg-slate-900 shadow-2xl transition-all duration-500">
+    <section className="group relative min-h-[400px] md:min-h-[450px] overflow-hidden rounded-3xl md:rounded-[2.5rem] bg-slate-900 shadow-xl md:shadow-2xl transition-all duration-500 w-full">
       {/* Background Image with Parallax-like effect */}
       <div className="absolute inset-0">
         <Image
@@ -45,14 +45,14 @@ export function GameHero({ game }: Props) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex h-full flex-col justify-end p-8 md:p-12 lg:p-16">
+      <div className="relative z-10 flex h-full flex-col justify-end p-6 md:p-12 lg:p-16">
         <div className="flex flex-col items-start gap-6 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md border border-violet-500/30">
             <Sparkles size={12} className="text-violet-400" />
             Destacado de la semana
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl drop-shadow-sm">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl drop-shadow-sm wrap-anywhere line-clamp-3 md:line-clamp-none">
             {game.title}
           </h1>
 

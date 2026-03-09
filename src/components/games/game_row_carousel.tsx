@@ -27,9 +27,9 @@ export function GameRowCarousel({ title, games, href }: Props) {
         </Link>
       </div>
       
-      <div className="hide-scrollbar flex w-full gap-6 overflow-x-auto pb-6 -mx-2 px-2 snap-x">
+      <div className="hide-scrollbar flex w-full gap-4 md:gap-6 overflow-x-auto pb-6 snap-x min-w-0">
         {games.map((game) => (
-          <div key={game.id} className="snap-start first:pl-2 last:pr-2">
+          <div key={game.id} className="snap-start shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[22%] xl:w-[18%]">
             <GameCard game={game} />
           </div>
         ))}

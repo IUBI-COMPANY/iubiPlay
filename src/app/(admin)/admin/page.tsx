@@ -33,8 +33,8 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 card-startup !p-0">
-          <div className="card-startup-inner !p-6">
+        <div className="lg:col-span-2 card-startup p-0!">
+          <div className="card-startup-inner p-6!">
             <h3 className="text-lg font-bold">Actividad Reciente</h3>
             <div className="mt-6 space-y-6">
               {[
@@ -55,8 +55,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="card-startup !p-0">
-          <div className="card-startup-inner !p-6 bg-linear-to-br from-violet-600 to-indigo-700 text-white">
+        <div className="card-startup p-0!">
+          <div className="card-startup-inner p-6! bg-linear-to-br from-violet-600 to-indigo-700 text-white">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles size={20} />
               <h3 className="font-bold">Iubi Insight</h3>
