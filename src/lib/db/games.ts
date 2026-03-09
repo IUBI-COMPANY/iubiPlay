@@ -102,19 +102,34 @@ export async function listGames(params: ListGamesParams = {}) {
   try {
     let gameIds: string[] | null = null;
     if (normalizedCategoryIds.length > 0) {
-      const { data: links, error: linksError } = await supabase
-        .from('game_categories')
-        .select('game_id')
-        .in('category_id', normalizedCategoryIds);
+      // Get game_ids for EACH category and find the intersection
+      const results = await Promise.all(
+        normalizedCategoryIds.map((id) =>
+          supabase
+            .from('game_categories')
+            .select('game_id')
+            .eq('category_id', id)
+            .then(({ data, error }) => {
+              if (error) throw new Error(error.message);
+              return (data ?? []).map((r) => r.game_id as string);
+            })
+        )
+      );
 
-      if (linksError) throw new Error(linksError.message);
-
-      const ids = (links ?? []).map((row) => row.game_id as string).filter(Boolean);
-      if (ids.length === 0) {
-        const summary = await buildSummarySafe();
-        return { items: [], total: 0, summary };
+      // Find intersection
+      if (results.length > 0) {
+        let intersection = results[0];
+        for (let i = 1; i < results.length; i++) {
+          const s = new Set(results[i]);
+          intersection = intersection.filter((id) => s.has(id));
+        }
+        
+        if (intersection.length === 0) {
+          const summary = await buildSummarySafe();
+          return { items: [], total: 0, summary };
+        }
+        gameIds = Array.from(new Set(intersection));
       }
-      gameIds = Array.from(new Set(ids));
     }
 
     let itemsQuery = supabase
