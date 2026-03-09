@@ -6,21 +6,6 @@ import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
 import { Category } from '@/src/types/category';
-import { 
-  Calculator, 
-  BookText, 
-  FlaskConical, 
-  Globe, 
-  History, 
-  Languages, 
-  Music, 
-  Palette,
-  Dumbbell,
-  Users,
-  LayoutDashboard,
-  Rocket,
-  GraduationCap
-} from 'lucide-react';
 
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
@@ -32,43 +17,6 @@ type Props = {
 
 export function CategoryCoverflow({ categories }: Props) {
   if (!categories || categories.length === 0) return null;
-
-  // Function to render icon based on category slug or icon name
-  const getCategoryIcon = (l: string, iconName?: string) => {
-    const iconsMap: Record<string, React.ReactNode> = {
-      'Calculator': <Calculator size={48} strokeWidth={1.5} />,
-      'BookText': <BookText size={48} strokeWidth={1.5} />,
-      'FlaskConical': <FlaskConical size={48} strokeWidth={1.5} />,
-      'Languages': <Languages size={48} strokeWidth={1.5} />,
-      'History': <History size={48} strokeWidth={1.5} />,
-      'Globe': <Globe size={48} strokeWidth={1.5} />,
-      'Palette': <Palette size={48} strokeWidth={1.5} />,
-      'Music': <Music size={48} strokeWidth={1.5} />,
-      'Dumbbell': <Dumbbell size={48} strokeWidth={1.5} />,
-      'Users': <Users size={48} strokeWidth={1.5} />,
-      'LayoutDashboard': <LayoutDashboard size={48} strokeWidth={1.5} />,
-      'Rocket': <Rocket size={48} strokeWidth={1.5} />,
-      'GraduationCap': <GraduationCap size={48} strokeWidth={1.5} />,
-    };
-
-    if (iconName && iconsMap[iconName]) return iconsMap[iconName];
-
-    const slug = l.toLowerCase();
-    
-    // Keyword matching
-    if (slug.includes('sociales') || slug.includes('social')) return iconsMap['Users'];
-    if (slug.includes('comunicacion') || slug.includes('lenguaje')) return iconsMap['BookText'];
-    if (slug.includes('matematica') || slug.includes('math')) return iconsMap['Calculator'];
-    if (slug.includes('ciencia') || slug.includes('nature') || slug.includes('fisica') || slug.includes('quimica')) return iconsMap['FlaskConical'];
-    if (slug.includes('ingles') || slug.includes('idioma')) return iconsMap['Languages'];
-    if (slug.includes('arte') || slug.includes('dibujo')) return iconsMap['Palette'];
-    if (slug.includes('historia')) return iconsMap['History'];
-    if (slug.includes('geografia')) return iconsMap['Globe'];
-    if (slug.includes('musica')) return iconsMap['Music'];
-    if (slug.includes('fisica') || slug.includes('deporte')) return iconsMap['Dumbbell'];
-
-    return <GraduationCap size={48} strokeWidth={1.5} />;
-  };
 
   // Premium abstract 3D images from Unsplash
   const abstractImages = [
@@ -163,7 +111,7 @@ export function CategoryCoverflow({ categories }: Props) {
         {categories.map((cat, index) => {
           const bgImage = getCategoryImage(cat.slug, index);
           return (
-            <SwiperSlide key={cat.id} className="w-[300px] sm:w-[350px] h-[460px]">
+            <SwiperSlide key={cat.id} className="w-[300px] sm:w-[350px] h-[550px]">
               <Link href={`/categories/${cat.slug}`} className="block w-full h-full relative group">
                 <div className={`w-full h-full rounded-3xl p-[2px] shadow-2xl transition-all duration-300 group-hover:scale-[1.03] bg-linear-to-b from-white/20 to-white/5`}>
                   
@@ -188,21 +136,22 @@ export function CategoryCoverflow({ categories }: Props) {
 
                     {/* Content Layer with Frosted Glass feeling */}
                     <div className="relative w-full h-full flex flex-col items-center justify-center p-8 text-white">
-                      
-                      {/* Icon container */}
-                      <div className="relative z-10 p-7 bg-white/10 rounded-[2rem] shadow-2xl border border-white/20 mb-8 backdrop-blur-md transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:rotate-3 group-hover:bg-white/20">
-                        {getCategoryIcon(cat.slug, cat.icon)}
+                      {/* Central bold title text */}
+                      <div className="relative z-10 flex flex-col items-center justify-center transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:scale-105 w-full">
+                        <h3 className="text-4xl sm:text-5xl font-black text-center mb-5 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] tracking-tighter uppercase px-2 leading-none">
+                          {cat.name}
+                        </h3>
+
+                        {cat.description && (
+                          <div className="w-12 h-1.5 bg-white/50 rounded-full mb-5 shadow-md" />
+                        )}
+
+                        {cat.description && (
+                          <p className="text-sm border-t border-transparent text-center text-white/95 line-clamp-3 font-semibold leading-relaxed px-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                            {cat.description}
+                          </p>
+                        )}
                       </div>
-
-                      <h3 className="relative z-10 text-3xl font-black text-center mb-3 drop-shadow-xl tracking-tight">
-                        {cat.name}
-                      </h3>
-
-                      {cat.description && (
-                        <p className="relative z-10 text-sm md:text-base text-center text-white/90 line-clamp-3 font-medium leading-relaxed px-2">
-                          {cat.description}
-                        </p>
-                      )}
                     </div>
 
                   </div>

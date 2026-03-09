@@ -42,8 +42,7 @@ export function GameHero({ games }: Props) {
         pagination={{ clickable: true, dynamicBullets: true }}
         navigation={true}
         loop={true}
-        grabCursor={true}
-        className="h-full w-full absolute inset-0 pb-8 group/swiper"
+        className="h-full w-full absolute inset-0 pb-8 group/swiper [&_.swiper-button-prev]:hidden! md:[&_.swiper-button-prev]:flex! [&_.swiper-button-next]:hidden! md:[&_.swiper-button-next]:flex!"
         style={{
           '--swiper-pagination-color': '#8b5cf6',
           '--swiper-pagination-bullet-inactive-color': '#fff',
@@ -76,7 +75,7 @@ export function GameHero({ games }: Props) {
               </div>
 
               {/* Content */}
-              <div className="relative z-10 flex h-full flex-col justify-end p-6 md:p-12 lg:p-16 mb-8">
+              <div className="relative z-10 flex h-full flex-col justify-end p-6 md:py-12 md:pr-12 md:pl-20 lg:py-16 lg:pr-16 lg:pl-24 mb-8">
                 <div className="flex flex-col items-start gap-6 max-w-3xl">
                   <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md border border-violet-500/30">
                     <Sparkles size={12} className="text-violet-400" />
