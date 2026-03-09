@@ -76,7 +76,7 @@ export function CategoryCoverflow({ categories }: Props) {
   };
 
   return (
-    <div className="w-full pt-6 pb-12 overflow-hidden">
+    <div className="w-full pt-6 pb-12">
       <div className="flex flex-col items-center mb-10">
         <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-white mb-3">
           Explora por Cursos
@@ -99,11 +99,10 @@ export function CategoryCoverflow({ categories }: Props) {
           stretch: 0, // Espacio entre tarjetas
           depth: 150, // Profundidad (z-index offset)
           modifier: 1, // Multiplicador de efecto
-          slideShadows: true, // Sombras 3D
+          slideShadows: false, // Quitamos las sombras nativas de swiper por que generan sobrantes
         }}
         pagination={{ clickable: true, dynamicBullets: true }}
-        modules={[EffectCoverflow, Pagination, Autoplay]}
-        className="w-full max-w-5xl pb-12!"
+        className="w-full max-w-5xl pb-14!"
         style={{
           '--swiper-pagination-color': '#8b5cf6',
         } as React.CSSProperties}
@@ -111,12 +110,17 @@ export function CategoryCoverflow({ categories }: Props) {
         {categories.map((cat, index) => {
           const bgImage = getCategoryImage(cat.slug, index);
           return (
-            <SwiperSlide key={cat.id} className="w-[300px] sm:w-[350px] h-[550px]">
+            <SwiperSlide key={cat.id} className="w-[320px] h-[480px] sm:w-[350px] sm:h-[500px]">
               <Link href={`/categories/${cat.slug}`} className="block w-full h-full relative group">
-                <div className={`w-full h-full rounded-3xl p-[2px] shadow-2xl transition-all duration-300 group-hover:scale-[1.03] bg-linear-to-b from-white/20 to-white/5`}>
+                
+                {/* Master outer container to totally clip strictly anything bleeding out in 3D */}
+                <div 
+                  className="w-full h-full rounded-3xl p-[2px] transition-transform duration-300 group-hover:scale-[1.03] bg-linear-to-b from-white/20 to-white/5 overflow-hidden relative z-0"
+                  style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                >
                   
-                  {/* Outer container to clip the image */}
-                  <div className="w-full h-full rounded-[22px] overflow-hidden relative">
+                  {/* Inner card container */}
+                  <div className="w-full h-full rounded-[22px] overflow-hidden relative z-0">
                     
                     {/* Premium Abstract Image Background */}
                     <div className="absolute inset-0">
