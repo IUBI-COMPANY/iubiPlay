@@ -212,6 +212,17 @@ export async function getGameById(id: string, client?: SupabaseClient): Promise<
   return normalizeGame(data as Record<string, unknown>);
 }
 
+export async function getGameBySlug(slug: string, client?: SupabaseClient): Promise<Game | null> {
+  const supabase = client ?? getSupabaseClient();
+  const { data, error } = await supabase
+    .from('games')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  if (error || !data) return null;
+  return normalizeGame(data as Record<string, unknown>);
+}
+
 export async function createGame(
   input: Omit<Game, 'id' | 'created_at' | 'updated_at'>,
   client?: SupabaseClient

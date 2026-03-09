@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { GameCard } from '@/src/components/games/game_card';
+import { GradeSwiper } from '@/src/components/public/grade_swiper';
 import { getCategoryBySlug, listCategories } from '@/src/lib/db/categories';
 import { listGames } from '@/src/lib/db/games';
 import { cn } from '@/src/lib/utils';
@@ -105,36 +106,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             })}
           </div>
 
-          {/* Grade Selector (Numbers) */}
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={`/categories/${category.slug}`}
-              className={cn(
-                "px-5 py-2.5 rounded-xl text-xs font-black transition-all border uppercase tracking-wider",
-                !level 
-                  ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-500/20" 
-                  : "bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-violet-500/30"
-              )}
-            >
-              Todos
-            </Link>
-            <div className="h-8 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
-            {parsedLevels
-              .filter(l => l.stage === activeStage)
-              .map((l) => (
-                <Link
-                  key={l.id}
-                  href={`/categories/${category.slug}?level=${l.slug}`}
-                  className={cn(
-                    "min-w-[48px] h-11 flex items-center justify-center rounded-xl text-sm font-black transition-all border",
-                    level === l.slug 
-                      ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-500/20" 
-                      : "bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-violet-500/30"
-                  )}
-                >
-                  {l.grade}
-                </Link>
-              ))}
+          {/* Grade Selector (Numbers) via Swiper */}
+          <div className="flex items-center gap-3">
+            <GradeSwiper 
+              parsedLevels={parsedLevels}
+              activeStage={activeStage}
+              currentLevelSlug={level}
+              basePath={`/categories/${category.slug}`}
+            />
           </div>
         </div>
       </header>
