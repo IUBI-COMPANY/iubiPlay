@@ -104,7 +104,7 @@ export function PublicShell({ children, navItems }: Props) {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar - Desktop */}
-      <aside className="hidden w-72 flex-col border-r border-slate-200/50 dark:border-white/5 glass-panel sticky top-0 h-screen md:flex">
+      <aside className="hidden w-72 flex-col border-r border-slate-200/50 dark:border-white/5 glass-panel sticky top-0 h-screen md:flex self-start">
         <div className="flex items-center gap-3 p-8">
           <span className="text-xl font-extrabold tracking-tight bg-linear-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
             IUBIPLAY
@@ -142,7 +142,7 @@ export function PublicShell({ children, navItems }: Props) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen flex-1 flex-col min-w-0 relative">
         {/* Header */}
         <header 
           className={cn(
@@ -150,7 +150,7 @@ export function PublicShell({ children, navItems }: Props) {
             scrolled ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 py-3" : "bg-transparent py-5"
           )}
         >
-          <div className="mx-auto flex w-full items-center justify-between gap-4">
+          <div className="mx-auto flex w-full items-center justify-between gap-2 md:gap-4 min-w-0">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -159,7 +159,7 @@ export function PublicShell({ children, navItems }: Props) {
               >
                 <Menu size={20} />
               </button>
-              <form action="/games" method="get" className="hidden sm:block">
+              <form action="/games" method="get" className="hidden lg:block flex-1 max-w-md">
                 <div className="relative group transition-all">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors">
                     <Search size={18} />
@@ -167,13 +167,13 @@ export function PublicShell({ children, navItems }: Props) {
                   <input
                     name="search"
                     placeholder="Buscar herramientas..."
-                    className="h-11 w-64 rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-violet-500/50 pl-11 pr-4 text-sm outline-none transition-all focus:w-80"
+                    className="h-11 w-full rounded-2xl bg-slate-100 dark:bg-white/5 border border-transparent focus:border-violet-500/50 pl-11 pr-4 text-sm outline-none transition-all"
                   />
                 </div>
               </form>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
               {displayName ? (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2 rounded-2xl glass-panel px-4 py-2 text-sm font-medium">

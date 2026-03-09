@@ -18,7 +18,7 @@ export function GameCard({ game, priority = false }: Props) {
   return (
     <Link
       href={href}
-      className="card-startup h-[280px] w-full min-w-[220px] max-w-[240px] flex flex-col"
+      className="card-startup w-full flex flex-col group overflow-hidden"
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
     >
