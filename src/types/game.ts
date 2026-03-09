@@ -71,6 +71,7 @@ export interface Game {
     updated_by?: string;
 
     is_deleted?: boolean;
+
 }
 
 // Backward-compatible aliases (legacy naming)
