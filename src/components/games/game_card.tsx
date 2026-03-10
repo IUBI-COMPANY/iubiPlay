@@ -12,15 +12,12 @@ const fallbackCover = '/file.svg';
 
 export function GameCard({ game, priority = false }: Props) {
   const cover = game.cover_image_url || fallbackCover;
-  const href = game.redirect_url?.trim() || `/games/${game.slug}`;
-  const isExternal = href.startsWith('http');
+  const href = `/games/${game.slug}`;
 
   return (
     <Link
       href={href}
       className="card-startup w-full flex flex-col group overflow-hidden"
-      target={isExternal ? '_blank' : undefined}
-      rel={isExternal ? 'noopener noreferrer' : undefined}
     >
       <div className="card-startup-inner p-0! flex flex-col h-full overflow-hidden">
         <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-white/5">

@@ -1,5 +1,6 @@
 import { GameHero } from '@/src/components/games/game_hero';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
+import { CategoryCoverflow } from '@/src/components/public/category_coverflow';
 import { listCategories } from '@/src/lib/db/categories';
 import { listGames } from '@/src/lib/db/games';
 
@@ -13,7 +14,7 @@ export default async function PublicHomePage() {
   });
 
   const [heroResult, newResult, popularResult, sections] = await Promise.all([
-    listGames({ status: 'published', limit: 1, throwOnError: false }),
+    listGames({ status: 'published', limit: 3, throwOnError: false }),
     listGames({ status: 'published', limit: 8, throwOnError: false }),
     listGames({ status: 'published', limit: 8, offset: 8, throwOnError: false }),
     Promise.all(
@@ -29,11 +30,13 @@ export default async function PublicHomePage() {
     ),
   ]);
 
-  const heroGame = heroResult.items[0] ?? null;
+  const heroGames = heroResult.items;
 
   return (
     <main className="space-y-10">
-      <GameHero game={heroGame} />
+      <GameHero games={heroGames} />
+
+      <CategoryCoverflow categories={courseCategories} />
 
       <GameRowCarousel title="Nuevos recursos" games={newResult.items} href="/games" />
 

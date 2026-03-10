@@ -1,7 +1,11 @@
+"use client";
+
 import Link from 'next/link';
 import type { Game } from '@/src/types/game';
 import { GameCard } from './game_card';
 import { ChevronRight } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 
 type Props = {
   title: string;
@@ -27,12 +31,19 @@ export function GameRowCarousel({ title, games, href }: Props) {
         </Link>
       </div>
       
-      <div className="hide-scrollbar flex w-full gap-4 md:gap-6 overflow-x-auto pb-6 snap-x min-w-0">
-        {games.map((game) => (
-          <div key={game.id} className="snap-start shrink-0 w-[85%] sm:w-[45%] md:w-[30%] lg:w-[22%] xl:w-[18%]">
-            <GameCard game={game} />
-          </div>
-        ))}
+      <div className="w-full relative">
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={16}
+          grabCursor={true}
+          className="w-full pb-6!"
+        >
+          {games.map((game) => (
+            <SwiperSlide key={game.id} className="w-[85%]! sm:w-[45%]! md:w-[30%]! lg:w-[22%]! xl:w-[18%]!">
+              <GameCard game={game} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );
