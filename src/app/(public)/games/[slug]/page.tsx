@@ -33,35 +33,35 @@ export default async function GameDetailPage({ params }: Props) {
     <main className="space-y-12 pb-12">
       {/* Header y Navegación */}
       <div className="flex items-center gap-4">
-        <Link href="/games" className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-slate-500">
+        <Link href="/games" className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors text-violet-400">
           <ArrowLeft size={20} />
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">{game.title}</h1>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">{game.title}</h1>
         </div>
       </div>
 
       {/* Hero Section (Galería Interactiva estilo Steam) */}
-      <section className="bg-slate-50 dark:bg-white/5 rounded-3xl p-4 md:p-6 border border-slate-200 dark:border-white/10 flex flex-col lg:flex-row gap-8">
+      <section className="bg-slate-900 rounded-3xl p-4 md:p-6 border border-slate-700 flex flex-col lg:flex-row gap-8">
         {/* Izquierda: Galería */}
         <div className="lg:w-[65%] w-full">
           <GameGallery title={game.title} images={imagesForGallery} />
         </div>
 
         {/* Derecha: Info y Call to Action */}
-        <div className="flex-1 flex flex-col justify-between py-2">
+        <div className="flex-1 flex flex-col justify-between py-2 max-w-md mx-auto h-fit">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 border border-violet-500/20">
               <Sparkles size={14} className="text-violet-500" />
               Excelente recurso
             </div>
             
-            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+            <p className="text-lg text-white leading-relaxed font-medium">
               {game.short_description || "Explora interactuando con este increíble recurso educativo. Ideal para fortalecer los conocimientos de forma dinámica y entretenida."}
             </p>
 
             {game.description && (
-              <div className="bg-white dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-white/10 text-sm text-slate-500 dark:text-slate-400">
+              <div className="bg-white p-4 rounded-2xl border border-white text-sm text-slate-500 mt-2">
                  {game.description}
               </div>
             )}
@@ -78,11 +78,11 @@ export default async function GameDetailPage({ params }: Props) {
             </Link>
 
             <div className="grid grid-cols-2 gap-3">
-              <button className="h-12 rounded-xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 font-bold flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition">
+              <button className="h-12 rounded-xl border border-white bg-white font-bold flex items-center justify-center gap-2 text-slate-500 hover:bg-slate-100 transition">
                 <LayoutDashboard size={18} />
                 Añadir clase
               </button>
-              <button className="h-12 rounded-xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 font-bold flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition">
+              <button className="h-12 rounded-xl border border-white bg-white font-bold flex items-center justify-center gap-2 text-slate-500 hover:bg-slate-100 transition">
                 <Share2 size={18} />
                 Compartir
               </button>

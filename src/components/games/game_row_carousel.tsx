@@ -19,7 +19,7 @@ export function GameRowCarousel({ title, games, href }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white">
+        <h2 className="text-2xl font-extrabold tracking-tight text-white">
           {title}
         </h2>
         <Link 

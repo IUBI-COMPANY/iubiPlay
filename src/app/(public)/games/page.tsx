@@ -65,13 +65,12 @@ export default async function GamesPage({ searchParams }: Props) {
   const nextQuery = buildQuery({ level, page: page < totalPages ? page + 1 : undefined });
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 rounded-xl">
       <header className="space-y-6 pb-4">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Todo el Contenido</h1>
-        
+        <h1 className="text-3xl font-black tracking-tight text-white">Todo el Contenido</h1>
         <div className="space-y-6">
           {/* Stage Filter (Tabs-like) */}
-          <div className="flex items-center p-1 w-fit bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+          <div className="flex items-center p-1 w-fit bg-white rounded-2xl border border-slate-200">
             {['Primaria', 'Secundaria'].map((s) => {
               const isActive = activeStage === s;
               const firstLevelOfStage = parsedLevels.find(l => l.stage === s);
@@ -80,10 +79,10 @@ export default async function GamesPage({ searchParams }: Props) {
                   key={s}
                   href={`/games?level=${firstLevelOfStage?.slug ?? ''}`}
                   className={cn(
-                    "px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                    isActive 
-                      ? "bg-white dark:bg-white/10 text-violet-600 dark:text-white shadow-sm" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    "px-6 py-2.5 rounded-xl text-sm font-black transition-all text-violet-600",
+                    isActive
+                      ? "bg-slate-100 text-violet-700 shadow-lg border-violet-500"
+                      : "hover:text-violet-700"
                   )}
                 >
                   {s}
@@ -105,7 +104,7 @@ export default async function GamesPage({ searchParams }: Props) {
       </header>
 
       {result.items.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
+        <div className="rounded-xl border border-white/10 bg-slate-800 p-6 text-sm text-slate-300">
           No se encontraron juegos con esos filtros.
         </div>
       ) : (
@@ -119,13 +118,13 @@ export default async function GamesPage({ searchParams }: Props) {
       <div className="flex flex-col items-center gap-4 text-sm text-slate-300 py-4">
         <div className="flex gap-3">
           <Link
-            className={`rounded-xl border border-white/10 px-6 py-2.5 font-bold transition-all ${page <= 1 ? 'pointer-events-none opacity-50' : 'hover:border-white/30 bg-white/5'}`}
+            className={`rounded-xl border border-white/10 px-6 py-2.5 font-bold transition-all bg-slate-800 ${page <= 1 ? 'pointer-events-none opacity-50' : 'hover:border-white/30'}`}
             href={prevQuery ? `/games?${prevQuery}` : '/games'}
           >
             Anterior
           </Link>
           <Link
-            className={`rounded-xl border border-white/10 px-6 py-2.5 font-bold transition-all ${page >= totalPages ? 'pointer-events-none opacity-50' : 'hover:border-white/30 bg-white/5'}`}
+            className={`rounded-xl border border-white/10 px-6 py-2.5 font-bold transition-all bg-slate-800 ${page >= totalPages ? 'pointer-events-none opacity-50' : 'hover:border-white/30'}`}
             href={nextQuery ? `/games?${nextQuery}` : '/games'}
           >
             Siguiente

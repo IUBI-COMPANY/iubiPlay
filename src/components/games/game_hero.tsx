@@ -33,7 +33,7 @@ export function GameHero({ games }: Props) {
   }
 
   return (
-    <section className="group relative min-h-[400px] md:min-h-[450px] overflow-hidden rounded-3xl md:rounded-[2.5rem] bg-slate-900 shadow-xl md:shadow-2xl w-full">
+    <section className="group relative min-h-[300px] md:min-h-[350px] overflow-visible rounded-3xl md:rounded-[2.5rem] w-full">
       <Swiper
         modules={[Autoplay, Pagination, Navigation, EffectFade]}
         effect="fade"
@@ -42,7 +42,7 @@ export function GameHero({ games }: Props) {
         pagination={{ clickable: true, dynamicBullets: true }}
         navigation={true}
         loop={true}
-        className="h-full w-full absolute inset-0 pb-8 group/swiper [&_.swiper-button-prev]:hidden! md:[&_.swiper-button-prev]:flex! [&_.swiper-button-next]:hidden! md:[&_.swiper-button-next]:flex!"
+        className="h-full w-full absolute inset-0 rounded-3xl md:rounded-[2.5rem] overflow-hidden"
         style={{
           '--swiper-pagination-color': '#8b5cf6',
           '--swiper-pagination-bullet-inactive-color': '#fff',
@@ -57,25 +57,22 @@ export function GameHero({ games }: Props) {
           const heroImage = game.hero_image_url || game.cover_image_url || fallbackCover;
           
           return (
-            <SwiperSlide key={game.id} className="relative w-full h-full bg-slate-900">
-              {/* Background Image */}
-              <div className="absolute inset-0 overflow-hidden">
+            <SwiperSlide key={game.id} className="relative w-full h-full rounded-3xl md:rounded-[2.5rem] overflow-hidden">
+              <div className="absolute inset-0 w-full h-full rounded-3xl md:rounded-[2.5rem] overflow-hidden">
                 <Image
                   src={heroImage}
                   alt={game.title}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
+                  className="object-cover w-full h-full rounded-3xl md:rounded-[2.5rem]"
                   sizes="100vw"
                   priority
                   unoptimized
                 />
-                {/* Modern Gradients */}
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-linear-to-r from-slate-950 via-slate-950/20 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 rounded-3xl md:rounded-[2.5rem] bg-gradient-to-t from-[#0f172a66] via-[#0f172a66] to-transparent pointer-events-none" />
               </div>
 
               {/* Content */}
-              <div className="relative z-10 flex h-full flex-col justify-end p-6 md:py-12 md:pr-12 md:pl-20 lg:py-16 lg:pr-16 lg:pl-24 mb-8">
+              <div className="relative z-10 flex h-full flex-col justify-end p-6 md:py-12 md:pr-12 md:pl-20 lg:py-16 lg:pr-16 lg:pl-24">
                 <div className="flex flex-col items-start gap-6 max-w-3xl">
                   <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md border border-violet-500/30">
                     <Sparkles size={12} className="text-violet-400" />
@@ -103,7 +100,7 @@ export function GameHero({ games }: Props) {
                     
                     <Link
                       href="/games"
-                      className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-white/20 hover:border-white/50 backdrop-blur-sm shadow-sm active:scale-95 z-20"
+                      className="flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-white/20 hover:border-white/50 backdrop-blur-sm shadow-sm active:scale-95 z-20"
                     >
                       <Search size={18} />
                       Explorar
@@ -117,7 +114,7 @@ export function GameHero({ games }: Props) {
       </Swiper>
 
       {/* Subtle overlay lines for texture */}
-      <div className="absolute inset-0 pointer-events-none opacity-10 bg-[radial-gradient(circle_at_1px_1px,#ffffff1a_1px,transparent_0)] bg-size-[32px_32px] z-20" />
+
     </section>
   );
 }
