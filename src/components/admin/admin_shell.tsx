@@ -4,12 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  LayoutDashboard, 
+
   Gamepad2, 
   Tags, 
-  Settings, 
-  Sparkles, 
-  Plus, 
+
   ArrowLeft,
   Menu,
   X,
@@ -76,10 +74,7 @@ export function AdminShell({ children }: Props) {
   const SidebarContent = () => (
     <>
       <div className="p-8 flex items-center gap-3">
-        <div className="h-8 w-8 rounded-lg bg-linear-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/20">
-          <Sparkles size={18} />
-        </div>
-        <span className="font-extrabold tracking-tight text-slate-900 dark:text-white">IUBI ADMIN</span>
+        <span className="font-extrabold text-3x1 tracking-tight text-slate-900 dark:text-white">IUBIPLAY</span>
       </div>
 
       <nav className="flex-1 px-4 space-y-1">
@@ -163,7 +158,7 @@ export function AdminShell({ children }: Props) {
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-sm md:text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase">Gestión Administrativa</h1>
+            <h1 className="text-sm md:text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase">Colabora con la Comunidad</h1>
           </div>
           <div className="flex items-center gap-3">
             {authUser && (

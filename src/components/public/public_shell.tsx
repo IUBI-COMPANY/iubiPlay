@@ -25,7 +25,8 @@ import {
   Heart,
   Atom,
   Beaker,
-  Radical
+  Radical,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/src/lib/utils';
@@ -227,6 +228,13 @@ export function PublicShell({ children, navItems }: Props) {
             <div className="flex items-center gap-2 md:gap-3 shrink-0">
               {displayName ? (
                 <div className="flex items-center gap-2">
+                  <Link
+                    href="/admin/games/new"
+                    className="hidden sm:flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-700 transition-all hover:scale-[1.02] active:scale-95"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Contribuir
+                  </Link>
                   <div className="flex items-center gap-2 rounded-2xl glass-panel px-4 py-2 text-sm font-medium">
                     <User size={16} className="text-violet-500" />
                     <span>{displayName}</span>
