@@ -121,7 +121,8 @@ export default function RegisterForm() {
             id="register-username"
             type="text"
             placeholder="Elige un nombre de usuario"
-            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+
+            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="username"
             required
             {...usernameRegister}
@@ -146,7 +147,7 @@ export default function RegisterForm() {
             id="register-email"
             type="email"
             placeholder="Introduce tu correo"
-            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="email"
             required
             {...emailRegister}
@@ -171,7 +172,7 @@ export default function RegisterForm() {
             id="register-password"
             type="password"
             placeholder="Crea una contraseña segura"
-            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="new-password"
             required
             {...passwordRegister}
@@ -196,7 +197,7 @@ export default function RegisterForm() {
             id="register-confirm-password"
             type="password"
             placeholder="Repite tu contraseña"
-            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+            className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="new-password"
             required
             {...confirmRegister}

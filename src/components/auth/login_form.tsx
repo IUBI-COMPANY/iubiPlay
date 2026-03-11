@@ -95,7 +95,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                         id="login-email"
                         type="email"
                         placeholder="Introduce tu email"
-                        className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
                         autoComplete="email"
                         required
                         {...emailRegister}
@@ -125,7 +125,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                         id="login-password"
                         type="password"
                         placeholder="Introduce tu contraseña"
-                        className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
                         autoComplete="current-password"
                         required
                         {...passwordRegister}
