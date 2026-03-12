@@ -11,17 +11,9 @@ import { inferCategorySlugs } from '@/src/lib/games/auto_fill_rules';
 import { 
   Sparkles, 
   Link as LinkIcon, 
-  Image as ImageIcon, 
-  Monitor, 
-  CheckCircle2, 
+  Image as ImageIcon, CheckCircle2,
   AlertCircle,
-  ArrowLeft,
-  Search,
-  Zap,
-  ChevronRight,
-  Globe,
-  Smartphone,
-  Check
+  ArrowLeft, Zap, Check
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -48,7 +40,7 @@ interface GameFormProps {
 }
 
 const inputClass =
-  'block w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
+  'block w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
 
 const DEFAULT_VALUES: FormData = {
   title: '',
@@ -303,7 +295,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto pb-12" noValidate>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-black text-slate-100 dark:text-white">
             {mode === 'edit' ? 'Editar Recurso' : 'Crear Nuevo Recurso'}
           </h2>
           <p className="text-sm text-slate-500 mt-1">Completa los datos para publicar el material educativo.</p>

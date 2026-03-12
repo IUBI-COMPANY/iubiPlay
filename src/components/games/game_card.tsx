@@ -37,11 +37,11 @@ export function GameCard({ game, priority = false }: Props) {
         </div>
         <div className="flex flex-1 flex-col justify-between p-4 bg-transparent">
           <div className="space-y-1">
-            <h3 className="line-clamp-1 text-base font-bold text-slate-800 dark:text-white group-hover:text-violet-500 transition-colors">
+            <h3 className="line-clamp-1 text-base font-bold text-white group-hover:text-violet-500 transition-colors">
               {game.title}
             </h3>
             {game.short_description && (
-              <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400 leading-snug">
+              <p className="line-clamp-2 text-xs text-slate-500 dark:text-white leading-snug">
                 {game.short_description}
               </p>
             )}
@@ -49,7 +49,7 @@ export function GameCard({ game, priority = false }: Props) {
           
           <div className="flex items-center gap-2 mt-2">
             <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recurso</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white">Recurso</span>
           </div>
         </div>
       </div>

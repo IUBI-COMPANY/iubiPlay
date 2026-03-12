@@ -1,6 +1,5 @@
 import { GameHero } from '@/src/components/games/game_hero';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
-import { CategoryCoverflow } from '@/src/components/public/category_coverflow';
 import { listCategories } from '@/src/lib/db/categories';
 import { listGames } from '@/src/lib/db/games';
 
@@ -36,7 +35,7 @@ export default async function PublicHomePage() {
     <main className="space-y-10">
       <GameHero games={heroGames} />
 
-      <CategoryCoverflow categories={courseCategories} />
+
 
       <GameRowCarousel title="Nuevos recursos" games={newResult.items} href="/games" />
 

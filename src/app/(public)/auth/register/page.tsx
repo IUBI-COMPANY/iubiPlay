@@ -18,7 +18,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Left Side: Brand & Hero (Desktop) */}
-      <div className="hidden lg:flex lg:w-[45%] relative flex-col justify-between p-16 bg-[#3d44e6] overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] relative flex-col justify-between p-16 bg-violet-600 overflow-hidden">
         {/* Abstract Background Design - Curved Lines like in the image */}
         <div className="absolute inset-0 pointer-events-none stroke-white/5 opacity-50">
           <svg className="absolute top-0 right-0 h-full w-[150%] translate-x-1/4" viewBox="0 0 100 100" preserveAspectRatio="none">

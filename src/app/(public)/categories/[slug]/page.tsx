@@ -81,7 +81,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <header className="space-y-1">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">Categoría</p>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{category.name}</h1>
+          <h1 className="text-3xl font-black tracking-tight text-white">{category.name}</h1>
         </div>
         <div className="pt-6 space-y-6">
           {/* Stage Filter (Tabs-like) */}
@@ -95,8 +95,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                   href={`/categories/${category.slug}?level=${firstLevelOfStage?.slug ?? ''}`}
                   className={cn(
                     "px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                    isActive 
-                      ? "bg-white dark:bg-white/10 text-violet-600 dark:text-white shadow-sm" 
+                    isActive
+                      ? "bg-white dark:bg-white/10 text-violet-600 dark:text-white shadow-sm"
                       : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   )}
                 >

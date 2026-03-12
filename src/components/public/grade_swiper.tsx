@@ -36,10 +36,8 @@ export function GradeSwiper({ parsedLevels, activeStage, currentLevelSlug, baseP
           <Link
             href={basePath}
             className={cn(
-              "px-5 py-2.5 rounded-xl text-xs font-black transition-all border uppercase tracking-wider flex items-center justify-center h-11",
-              !currentLevelSlug
-                ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-500/20"
-                : "bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-violet-500/30"
+              "px-5 py-2.5 rounded-xl text-xs font-black transition-all border uppercase tracking-wider flex items-center justify-center h-11 bg-violet-600 text-white border-transparent shadow-lg shadow-violet-500/20",
+              !currentLevelSlug && "bg-violet-700 text-white"
             )}
           >
             Todos
@@ -51,11 +49,10 @@ export function GradeSwiper({ parsedLevels, activeStage, currentLevelSlug, baseP
             <Link
               href={`${basePath}?level=${l.slug}`}
               className={cn(
-                "min-w-[48px] px-4 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-all border",
-                currentLevelSlug === l.slug
-                  ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-500/20"
-                  : "bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-violet-500/30"
+                "min-w-[48px] px-4 h-11 flex items-center justify-center rounded-xl text-sm font-black transition-all border bg-white text-violet-600 border-slate-200",
+                currentLevelSlug === l.slug && "shadow-lg shadow-violet-500/30 bg-white text-violet-700 border-violet-500"
               )}
+              passHref
             >
               {l.grade}
             </Link>
