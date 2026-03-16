@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { setAuthCookies } from '@/src/lib/auth/cookies';
+import crypto from 'crypto';
 
 interface LoginBody {
   email: string;
@@ -52,6 +53,32 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({ ok: true, message: 'Login exitoso' });
     setAuthCookies(res, data.session);
+
+    // --- Sesión única: genera y guarda session_token, setea cookies ---
+    const userId = data.user?.id;
+    if (userId) {
+      const sessionToken = crypto.randomUUID();
+      await supabase
+        .from('profiles')
+        .update({ session_token: sessionToken })
+        .eq('id', userId);
+
+      res.cookies.set('session_token', sessionToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      res.cookies.set('sb-user-id', userId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+    // --- fin sesión única ---
     return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error interno';

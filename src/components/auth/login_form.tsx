@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import type { Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+import { getBrowserSupabaseClient } from '@/src/lib/supabase/client';
 
 const schema = yup.object({
     email: yup.string().trim().required('Email requerido').email('Email inválido'),
@@ -74,6 +75,18 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
         },
     });
 
+    const handleGoogleLogin = async () => {
+        setMessageError(null);
+        const supabase = getBrowserSupabaseClient();
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+        if (error) setMessageError(error.message);
+    };
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             {messageError && (
@@ -137,7 +150,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                 )}
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col gap-3">
                 <button
                     type="submit"
                     disabled={isSubmitting}
@@ -154,6 +167,14 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                     ) : (
                         'Ingresar ahora'
                     )}
+                </button>
+                <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    className="w-full h-12 flex items-center justify-center rounded-xl bg-white text-slate-900 border border-slate-200 text-sm font-bold transition-all hover:bg-slate-100 active:scale-[0.98] shadow-lg shadow-black/10 gap-2"
+                >
+                    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#clip0_17_40)"><path d="M47.5 24.552C47.5 22.864 47.345 21.232 47.06 19.667H24V28.334H37.06C36.5 31.334 34.5 34.334 31.5 36.334V41.334H39C43.5 37.334 47.5 31.334 47.5 24.552Z" fill="#4285F4"/><path d="M24 48C30.5 48 36 45.667 39.5 41.334L31.5 36.334C29.5 37.667 27 38.334 24 38.334C17.5 38.334 12 33.334 10.5 27.334H2.5V32.667C6 40 14.5 48 24 48Z" fill="#34A853"/><path d="M10.5 27.334C10 25.667 10 24 10 22.334C10 20.667 10 19 10.5 17.334V12H2.5C0.5 16 0.5 20 0.5 24C0.5 28 0.5 32 2.5 36L10.5 27.334Z" fill="#FBBC05"/><path d="M24 9.667C27.5 9.667 30.5 10.667 32.5 12.334L39.5 5.334C36 2.334 30.5 0 24 0C14.5 0 6 8 2.5 16L10.5 24.667C12 18.667 17.5 13.667 24 13.667V9.667Z" fill="#EA4335"/></g><defs><clipPath id="clip0_17_40"><rect width="48" height="48" fill="white"/></clipPath></defs></svg>
+                    Ingresar con Google
                 </button>
             </div>
         </form>

@@ -12,6 +12,9 @@ Rules:
 - Use async data fetching in server components
 - Use loading.tsx and error.tsx patterns
 - Use dynamic imports for heavy components
+- Avoid unnecessary re-renders
+- avoid prop drilling, use context or state management when needed
+- Avoid use middleware, use proxy API routes instead
 
 UI rules:
 

@@ -5,9 +5,15 @@ import { setAuthCookies } from '@/src/lib/auth/cookies';
 const ACCESS_TOKEN_COOKIE = 'sb-access-token';
 const REFRESH_TOKEN_COOKIE = 'sb-refresh-token';
 
+
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  // Permite token por header Authorization o cookie
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.replace('Bearer ', '')
+    : req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
+  const sessionTokenCookie = req.cookies.get('session_token')?.value;
 
   if (!token && !refreshToken) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
@@ -31,12 +37,21 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (!error && data?.user) {
-      const username = await resolveUsername(supabase, data.user.id, data.user.user_metadata);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username,role,session_token')
+        .eq('id', data.user.id)
+        .maybeSingle();
+      // Validación de sesión única
+      if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
+        return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
+      }
       return NextResponse.json({
         ok: true,
         user: {
-          username,
+          username: profile?.username ?? null,
           email: data.user.email ?? null,
+          role: profile?.role ?? 'user',
         },
       });
     }
@@ -54,17 +69,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
   }
 
-  const username = await resolveUsername(
-    supabase,
-    refreshData.user.id,
-    refreshData.user.user_metadata
-  );
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username,role,session_token')
+    .eq('id', refreshData.user.id)
+    .maybeSingle();
+
+  // Validación de sesión única
+  if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
+    return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
+  }
 
   const res = NextResponse.json({
     ok: true,
     user: {
-      username,
+      username: profile?.username ?? null,
       email: refreshData.user.email ?? null,
+      role: profile?.role ?? 'user',
     },
   });
 
@@ -73,23 +94,3 @@ export async function GET(req: NextRequest) {
 }
 
 
-
-import type { SupabaseClient } from '@supabase/supabase-js';
-
-async function resolveUsername(
-  supabase: SupabaseClient,
-  userId: string,
-  userMetadata: Record<string, unknown> | null | undefined
-): Promise<string | null> {
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (!profileError && profile?.username) {
-    return profile.username;
-  }
-
-  return typeof userMetadata?.username === 'string' ? userMetadata.username : null;
-}
