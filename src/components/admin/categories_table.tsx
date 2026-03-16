@@ -25,7 +25,7 @@ type CategoriesResponse = {
 };
 
 const inputClass =
-  'w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
+  'w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
 
 const PAGE_SIZE = 10;
 
@@ -123,7 +123,7 @@ export function CategoriesTable() {
   return (
     <section className="space-y-8">
       {/* Search and Filters */}
-      <div className="glass-panel p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
+      <div className="bg-slate-900 border border-slate-700 p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
         <div className="flex-1 space-y-2">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Buscar Categorías</label>
           <div className="relative group">
@@ -187,10 +187,10 @@ export function CategoriesTable() {
       )}
 
       {/* Table Section */}
-      <div className="card-startup p-0!">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-0">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100 dark:divide-white/5 text-sm">
-            <thead className="bg-slate-50/50 dark:bg-white/2">
+          <table className="min-w-full divide-y divide-slate-700 text-sm">
+            <thead className="bg-slate-800">
               <tr>
                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Nombre & Info</th>
                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 hidden md:table-cell">Slug Identificador</th>
@@ -199,21 +199,21 @@ export function CategoriesTable() {
                 <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+            <tbody className="divide-y divide-slate-700">
               {items.map((category) => (
-                <tr key={category.id} className="group hover:bg-slate-50/50 dark:hover:bg-white/1 transition-colors">
+                <tr key={category.id} className="group hover:bg-slate-800 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-violet-500 transition-colors">
+                      <div className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-violet-400 transition-colors">
                         <Layers size={18} />
                       </div>
-                      <span className="font-extrabold text-slate-800 dark:text-white leading-tight">
+                      <span className="font-extrabold text-slate-100 leading-tight">
                         {category.name}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
-                    <code className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-lg">
+                    <code className="text-[11px] font-mono text-slate-400 bg-slate-800 px-3 py-1 rounded-lg">
                       {category.slug}
                     </code>
                   </td>
@@ -221,8 +221,8 @@ export function CategoriesTable() {
                     <span className={cn(
                       "inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
                       category.type === 'level' 
-                        ? "border-blue-500/20 text-blue-600 bg-blue-500/5" 
-                        : "border-orange-500/20 text-orange-600 bg-orange-500/5"
+                        ? "border-blue-500/40 text-blue-300 bg-blue-900/40" 
+                        : "border-orange-500/40 text-orange-300 bg-orange-900/40"
                     )}>
                       {category.type === 'level' ? 'Nivel' : 'Curso'}
                     </span>
@@ -231,8 +231,8 @@ export function CategoriesTable() {
                     <span className={cn(
                       "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
                       category.is_active 
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
-                        : "bg-red-500/10 text-red-600 dark:text-red-400"
+                        ? "bg-emerald-900/40 text-emerald-300" 
+                        : "bg-red-900/40 text-red-300"
                     )}>
                       {category.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                       {category.is_active ? 'Activo' : 'Inactivo'}
@@ -242,7 +242,7 @@ export function CategoriesTable() {
                     <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <Link
                         href={`/admin/categories/${category.id}/edit`}
-                        className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-violet-400 hover:bg-slate-800 transition-colors"
                         title="Editar"
                       >
                         <Edit3 size={18} />
@@ -251,7 +251,7 @@ export function CategoriesTable() {
                         onClick={() => toggleActive(category)}
                         className={cn(
                           "p-2 rounded-xl transition-colors",
-                          category.is_active ? "text-amber-500 hover:bg-amber-50" : "text-emerald-500 hover:bg-emerald-50"
+                          category.is_active ? "text-amber-400 hover:bg-slate-800" : "text-emerald-400 hover:bg-slate-800"
                         )}
                         title={category.is_active ? 'Desactivar' : 'Activar'}
                       >
@@ -259,7 +259,7 @@ export function CategoriesTable() {
                       </button>
                       <button
                         onClick={() => deleteItem(category)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 size={18} />
@@ -270,7 +270,7 @@ export function CategoriesTable() {
               ))}
               {!loading && items.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 italic">
                     Sin categorías para mostrar.
                   </td>
                 </tr>
@@ -283,7 +283,7 @@ export function CategoriesTable() {
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-          Página <span className="text-slate-900 dark:text-white">{page}</span> de {totalPages}
+          Página <span className="text-slate-100">{page}</span> de {totalPages}
         </p>
         <div className="flex gap-2">
           <button

@@ -8,7 +8,6 @@ import { validateCategorySelections } from "@/src/lib/db/categories";
 import { getWriteClientFromRequest } from "@/src/lib/supabase/auth";
 import { setAuthCookies } from "@/src/lib/auth/cookies";
 
-const ACCESS_TOKEN_COOKIE = "sb-access-token";
 
 type Ctx = { params: Promise<{ id: string }> };
 

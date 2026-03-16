@@ -36,7 +36,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   
   const parsedLevels = allLevels.map(l => {
     const name = l.name.toLowerCase();
-    let grade = l.name.match(/\d+/) ? l.name.match(/\d+/)![0] + '°' : l.name;
+    const grade = l.name.match(/\d+/) ? l.name.match(/\d+/)![0] + '°' : l.name;
     let stage: 'Primaria' | 'Secundaria' | 'Otro' = 'Otro';
     if (name.includes('primaria')) stage = 'Primaria';
     else if (name.includes('secundaria')) stage = 'Secundaria';

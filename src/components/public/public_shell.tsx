@@ -42,16 +42,12 @@ export function PublicShell({ children, navItems }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [authUser, setAuthUser] = React.useState<{ username: string | null; email: string | null } | null>(null);
   const [authReady, setAuthReady] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
+
   const pathname = usePathname();
 
   const closeMenu = () => setIsOpen(false);
 
-  React.useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+ 
 
   React.useEffect(() => {
     let active = true;

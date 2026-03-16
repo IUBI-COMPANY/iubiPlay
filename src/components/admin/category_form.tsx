@@ -43,7 +43,7 @@ interface CategoryFormProps {
 }
 
 const inputClass =
-  'block w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
+  'block w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
 
 const DEFAULT_VALUES: FormData = {
   name: '',
@@ -124,22 +124,22 @@ export function CategoryForm({ mode = 'create', categoryId, initialData }: Categ
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto pb-12" noValidate>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-black text-slate-100">
             {mode === 'edit' ? 'Editar Categoría' : 'Nueva Categoría'}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Define niveles educativos o cursos específicos.</p>
+          <p className="text-sm text-slate-400 mt-1">Define niveles educativos o cursos específicos.</p>
         </div>
         <button 
           type="button" 
           onClick={() => router.back()}
-          className="flex items-center gap-2 p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 text-sm font-bold transition-all"
+          className="flex items-center gap-2 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition-all"
         >
           <ArrowLeft size={18} />
           Volver
         </button>
       </div>
 
-      <div className="card-startup p-8!">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8">
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -204,13 +204,13 @@ export function CategoryForm({ mode = 'create', categoryId, initialData }: Categ
             {errors.description && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.description.message}</p>}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-white/5">
+          <div className="pt-4 border-t border-slate-700">
             <label className="inline-flex items-center gap-3 cursor-pointer group">
               <div className="relative">
                 <input type="checkbox" className="sr-only peer" {...register('is_active')} />
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500 transition-colors"></div>
               </div>
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Categoría activa</span>
+              <span className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">Categoría activa</span>
             </label>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { setAuthCookies } from '@/src/lib/auth/cookies';
 
 const ACCESS_TOKEN_COOKIE = 'sb-access-token';
@@ -72,12 +72,12 @@ export async function GET(req: NextRequest) {
   return res;
 }
 
-interface Profile {
-  username: string;
-}
+
+
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 async function resolveUsername(
-  supabase: any,
+  supabase: SupabaseClient,
   userId: string,
   userMetadata: Record<string, unknown> | null | undefined
 ): Promise<string | null> {

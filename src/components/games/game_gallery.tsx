@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs, FreeMode, Mousewheel } from 'swiper/modules';
+import type { Swiper as SwiperClass } from 'swiper';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -16,7 +18,7 @@ type Props = {
 };
 
 export function GameGallery({ title, images }: Props) {
-  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
 
   if (!images || images.length === 0) return null;
 

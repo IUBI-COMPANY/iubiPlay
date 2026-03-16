@@ -5,7 +5,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div>
         <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Panel de Control</h2>
-        <p className="text-slate-500 dark:text-slate-400 mt-1 text-lg font-medium italic">"Colabora con la comunidad para hacer de IubiPlay un lugar mejor"</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-lg font-medium italic">&quot;Colabora con la comunidad para hacer de IubiPlay un lugar mejor&quot;</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
               <h3 className="font-bold">Iubi Insight</h3>
             </div>
             <p className="text-sm text-indigo-100/90 leading-relaxed">
-              Los recursos de "Matemáticas" están teniendo un 25% más de interacción este mes. Considera destacar nuevos juegos en esta categoría.
+              Los recursos de &quot;Matemáticas&quot; están teniendo un 25% más de interacción este mes. Considera destacar nuevos juegos en esta categoría.
             </p>
             <button className="mt-6 w-full py-3 rounded-2xl bg-white text-violet-600 text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-900/40 hover:scale-105 transition-transform">
               Ver reporte detallado
@@ -75,6 +75,6 @@ export default function AdminDashboardPage() {
 }
 
 // Internal utility since cn might be needed but we are in a server component-ish context sometimes
-function cn(...inputs: any[]) {
+function cn(...inputs: (string | undefined | null | false)[]): string {
   return inputs.filter(Boolean).join(' ');
 }
