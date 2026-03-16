@@ -8,7 +8,7 @@ export function setAuthCookies(res: NextResponse, session: Session) {
   const isProd = process.env.NODE_ENV === 'production';
   const secure = isProd ? true : false;
   if (!isProd) {
-    // eslint-disable-next-line no-console
+     
     console.warn('[setAuthCookies] Cookies httpOnly sin secure en local/dev');
   }
   res.cookies.set(ACCESS_TOKEN_COOKIE, session.access_token, {

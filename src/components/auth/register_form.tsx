@@ -112,7 +112,7 @@ export default function RegisterForm() {
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (e) {
+    } catch {
       setMessageError('Error al iniciar registro con Google');
     }
   };

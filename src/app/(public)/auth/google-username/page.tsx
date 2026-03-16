@@ -6,20 +6,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function GoogleUsernamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
   const email = searchParams.get("email") || "";
   const userId = searchParams.get("id") || "";
-
-  // Sugerir username basado en el email
-  useEffect(() => {
-    if (email && !username) {
+  // Sugerir username basado en el email solo en el primer render
+  const [username, setUsername] = useState(() => {
+    if (email) {
       const suggestion = email.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase().slice(0, 20);
-      setUsername(suggestion || "");
+      return suggestion || "";
     }
-  }, [email]);
+    return "";
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Redirección automática si ya tiene username
   useEffect(() => {

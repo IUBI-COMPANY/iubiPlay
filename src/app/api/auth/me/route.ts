@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     ? authHeader.replace('Bearer ', '')
     : req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
+  const sessionTokenCookie = req.cookies.get('session_token')?.value;
 
   if (!token && !refreshToken) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
@@ -38,9 +39,13 @@ export async function GET(req: NextRequest) {
     if (!error && data?.user) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('username,role')
+        .select('username,role,session_token')
         .eq('id', data.user.id)
         .maybeSingle();
+      // Validación de sesión única
+      if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
+        return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
+      }
       return NextResponse.json({
         ok: true,
         user: {
@@ -66,9 +71,14 @@ export async function GET(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username,role')
+    .select('username,role,session_token')
     .eq('id', refreshData.user.id)
     .maybeSingle();
+
+  // Validación de sesión única
+  if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
+    return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
+  }
 
   const res = NextResponse.json({
     ok: true,
@@ -84,23 +94,3 @@ export async function GET(req: NextRequest) {
 }
 
 
-
-import type { SupabaseClient } from '@supabase/supabase-js';
-
-async function resolveUsername(
-  supabase: SupabaseClient,
-  userId: string,
-  userMetadata: Record<string, unknown> | null | undefined
-): Promise<string | null> {
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (!profileError && profile?.username) {
-    return profile.username;
-  }
-
-  return typeof userMetadata?.username === 'string' ? userMetadata.username : null;
-}
