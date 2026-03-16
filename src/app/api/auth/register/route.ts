@@ -152,12 +152,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const res = NextResponse.json(
-      { ok: true, message: 'Revisa tu correo para continuar' },
-      { status: 201 }
-    );
-    if (data?.session) {
-      setAuthCookies(res, data.session);
+    let res: NextResponse;
+    if (data?.session && data?.user) {
+      // Crea o actualiza el perfil en profiles
+      await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          email: data.user.email,
+          username,
+        }, { onConflict: 'id' });
+
+      setAuthCookies(res = NextResponse.redirect(new URL('/', req.url)), data.session);
+      // --- Sesión única: genera y guarda session_token, setea cookies ---
+      const crypto = await import('crypto');
+      const sessionToken = crypto.randomUUID();
+      await supabase
+        .from('profiles')
+        .update({ session_token: sessionToken })
+        .eq('id', data.user.id);
+
+      res.cookies.set('session_token', sessionToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      res.cookies.set('sb-user-id', data.user.id, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      // --- fin sesión única ---
+    } else {
+      // Si no hay sesión (registro con confirmación por correo), responde normal
+      res = NextResponse.json(
+        { ok: true, message: 'Revisa tu correo para continuar' },
+        { status: 201 }
+      );
     }
     return res;
   } catch (err: unknown) {

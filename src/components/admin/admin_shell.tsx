@@ -30,7 +30,7 @@ export function AdminShell({ children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [isAuthChecking, setIsAuthChecking] = React.useState(true);
-  const [authUser, setAuthUser] = React.useState<{ username: string | null; email: string | null } | null>(null);
+  const [authUser, setAuthUser] = React.useState<{ username: string | null; email: string | null; role?: string | null } | null>(null);
 
   // Close menu when route changes
   React.useEffect(() => {
@@ -41,15 +41,80 @@ export function AdminShell({ children }: Props) {
   React.useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        let res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.status === 401) {
+          // Fallback: intenta obtener el token con el SDK de Supabase
+          try {
+            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
+            const supabase = getBrowserSupabaseClient();
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            if (accessToken) {
+              res = await fetch('/api/auth/me', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                cache: 'no-store',
+              });
+            }
+          } catch {}
+        }
         if (!res.ok) {
           router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
           return;
         }
         const data = await res.json();
+        const userRole = data?.user?.role ?? null;
+        if (userRole !== 'user' && userRole !== 'admin') {
+          router.push('/');
+          return;
+        }
         setAuthUser({
           username: data?.user?.username ?? null,
           email: data?.user?.email ?? null,
+          role: userRole,
+        });
+        setIsAuthChecking(false);
+      } catch (e) {
+        console.error("Auth check failed", e);
+        router.push('/');
+      }
+    };
+    checkAuth();
+  }, [router, pathname]);
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        let res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.status === 401) {
+          // Fallback: intenta obtener el token con el SDK de Supabase
+          try {
+            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
+            const supabase = getBrowserSupabaseClient();
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            if (accessToken) {
+              res = await fetch('/api/auth/me', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                cache: 'no-store',
+              });
+            }
+          } catch (e) {
+            console.error('Fallback auth error', e);
+          }
+        }
+        if (!res.ok) {
+          router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
+          return;
+        }
+        const data = await res.json();
+        const userRole = data?.user?.role ?? null;
+        if (userRole !== 'admin' && userRole !== 'user') {
+          router.push('/');
+          return;
+        }
+        setAuthUser({
+          username: data?.user?.username ?? null,
+          email: data?.user?.email ?? null,
+          role: userRole,
         });
         setIsAuthChecking(false);
       } catch (e) {
@@ -107,7 +172,7 @@ export function AdminShell({ children }: Props) {
         </div>
       </aside>
       {/* Main Content */}
-      <div className="flex min-h-screen flex-1 flex-col min-w-0 relative">
+      <div className="flex min-h-screen flex-1 flex-col min-w-0 relative bg-slate-900">
         {/* Header */}
         <header className="sticky top-0 z-40 w-full transition-all duration-200 px-4 py-6 md:px-8 bg-slate-900">
           <div className="mx-auto flex w-full items-center justify-between gap-2 md:gap-4 min-w-0">

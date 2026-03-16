@@ -5,8 +5,13 @@ import { setAuthCookies } from '@/src/lib/auth/cookies';
 const ACCESS_TOKEN_COOKIE = 'sb-access-token';
 const REFRESH_TOKEN_COOKIE = 'sb-refresh-token';
 
+
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  // Permite token por header Authorization o cookie
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.replace('Bearer ', '')
+    : req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
   if (!token && !refreshToken) {
@@ -31,12 +36,17 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (!error && data?.user) {
-      const username = await resolveUsername(supabase, data.user.id, data.user.user_metadata);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username,role')
+        .eq('id', data.user.id)
+        .maybeSingle();
       return NextResponse.json({
         ok: true,
         user: {
-          username,
+          username: profile?.username ?? null,
           email: data.user.email ?? null,
+          role: profile?.role ?? 'user',
         },
       });
     }
@@ -54,17 +64,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
   }
 
-  const username = await resolveUsername(
-    supabase,
-    refreshData.user.id,
-    refreshData.user.user_metadata
-  );
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('username,role')
+    .eq('id', refreshData.user.id)
+    .maybeSingle();
 
   const res = NextResponse.json({
     ok: true,
     user: {
-      username,
+      username: profile?.username ?? null,
       email: refreshData.user.email ?? null,
+      role: profile?.role ?? 'user',
     },
   });
 

@@ -52,12 +52,28 @@ export function PublicShell({ children, navItems }: Props) {
   React.useEffect(() => {
     let active = true;
 
+
     const loadUser = async () => {
       try {
-        const res = await fetch('/api/auth/me', {
+        let res = await fetch('/api/auth/me', {
           credentials: 'include',
           cache: 'no-store',
         });
+        if (res.status === 401) {
+          // Fallback: intenta obtener el token con el SDK de Supabase
+          try {
+            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
+            const supabase = getBrowserSupabaseClient();
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            if (accessToken) {
+              res = await fetch('/api/auth/me', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                cache: 'no-store',
+              });
+            }
+          } catch {}
+        }
         if (!res.ok) {
           if (active) setAuthUser(null);
           return;
@@ -88,7 +104,13 @@ export function PublicShell({ children, navItems }: Props) {
 
   const handleLogout = React.useCallback(async () => {
     try {
+      // Cierra sesión en Supabase (incluye Google OAuth)
+      const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
+      const supabase = getBrowserSupabaseClient();
+      await supabase.auth.signOut();
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (e) {
+      console.error('Logout error', e);
     } finally {
       setAuthUser(null);
       setAuthReady(true);
@@ -150,7 +172,7 @@ export function PublicShell({ children, navItems }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-slate-950">
       {/* Sidebar - Desktop */}
       <aside className="hidden w-72 flex-col border-r border-slate-200/50 border-white/5 glass-panel sticky top-0 h-screen md:flex self-start">
         <div className="flex items-center gap-3 p-8">
