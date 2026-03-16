@@ -36,7 +36,7 @@ type GamesResponse = {
 };
 
 const inputClass =
-  'w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-800 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
+  'w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
 
 const PAGE_SIZE = 10;
 const CATEGORIES_CACHE_KEY = 'iubiplay:categories:active';
@@ -214,7 +214,7 @@ export function GamesTable() {
       </div>
 
       {/* Filters Bar */}
-      <div className="glass-panel p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
+      <div className="bg-slate-900 border border-slate-700 p-6 rounded-[2.5rem] flex flex-col gap-4 lg:flex-row lg:items-end">
         <div className="flex-1 space-y-2">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Búsqueda rápida</label>
           <div className="relative group">
@@ -273,10 +273,10 @@ export function GamesTable() {
       )}
 
       {/* Table Section */}
-      <div className="card-startup p-0!">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-0">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100 dark:divide-white/5 text-sm">
-            <thead className="bg-slate-50/50 dark:bg-white/2">
+          <table className="min-w-full divide-y divide-slate-700 text-sm">
+            <thead className="bg-slate-800">
               <tr>
                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Media</th>
                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Recurso & Info</th>
@@ -285,11 +285,11 @@ export function GamesTable() {
                 <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+            <tbody className="divide-y divide-slate-700">
               {items.map((game) => (
-                <tr key={game.id} className="group hover:bg-slate-50/50 dark:hover:bg-white/1 transition-colors">
+                <tr key={game.id} className="group hover:bg-slate-800 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="relative h-12 w-20 overflow-hidden rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                    <div className="relative h-12 w-20 overflow-hidden rounded-xl border border-slate-700 shadow-sm transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={game.cover_image_url || '/file.svg'}
                         alt={game.title}
@@ -301,7 +301,7 @@ export function GamesTable() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-extrabold text-slate-800 dark:text-white group-hover:text-violet-600 transition-colors">
+                      <span className="font-extrabold text-slate-100 group-hover:text-violet-400 transition-colors">
                         {game.title}
                       </span>
                       <span className="text-[11px] font-medium text-slate-400 line-clamp-1 italic">
@@ -310,7 +310,7 @@ export function GamesTable() {
                     </div>
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
-                    <code className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-lg">
+                    <code className="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-1 rounded-lg">
                       {game.slug}
                     </code>
                   </td>
@@ -318,10 +318,10 @@ export function GamesTable() {
                     <span className={cn(
                       "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
                       game.status === 'published' 
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
-                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        ? "bg-emerald-900/40 text-emerald-300" 
+                        : "bg-amber-900/40 text-amber-300"
                     )}>
-                      <span className={cn("h-1.5 w-1.5 rounded-full", game.status === 'published' ? "bg-emerald-500" : "bg-amber-500")} />
+                      <span className={cn("h-1.5 w-1.5 rounded-full", game.status === 'published' ? "bg-emerald-500" : "bg-amber-500")}/>
                       {game.status}
                     </span>
                   </td>
@@ -329,7 +329,7 @@ export function GamesTable() {
                     <div className="flex items-center justify-end gap-1 translate-x-2 opacity-60 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
                       <Link
                         href={`/admin/games/${game.id}/edit`}
-                        className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-violet-400 hover:bg-slate-800 transition-colors"
                         title="Editar"
                       >
                         <Edit3 size={18} />
@@ -339,8 +339,8 @@ export function GamesTable() {
                         className={cn(
                           "p-2 rounded-xl transition-colors",
                           game.status === 'published' 
-                            ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10" 
-                            : "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                            ? "text-amber-400 hover:bg-slate-800" 
+                            : "text-emerald-400 hover:bg-slate-800"
                         )}
                         title={game.status === 'published' ? 'Despublicar' : 'Publicar'}
                       >
@@ -348,7 +348,7 @@ export function GamesTable() {
                       </button>
                       <button
                         onClick={() => deleteItem(game)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 size={18} />
@@ -359,7 +359,7 @@ export function GamesTable() {
               ))}
               {!loading && items.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 italic">
                     No se encontraron recursos disponibles.
                   </td>
                 </tr>
@@ -373,9 +373,9 @@ export function GamesTable() {
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
           <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-            Página <span className="text-slate-900 dark:text-white leading-none inline-block align-middle">{page}</span>
+            Página <span className="text-slate-100 leading-none inline-block align-middle">{page}</span>
           </p>
-          <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-white/10" />
+          <span className="h-1 w-1 rounded-full bg-slate-700" />
           <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
             Total {totalPages}
           </p>

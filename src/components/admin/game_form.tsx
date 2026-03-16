@@ -40,7 +40,7 @@ interface GameFormProps {
 }
 
 const inputClass =
-  'block w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 dark:text-white outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
+  'block w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all placeholder:text-slate-400';
 
 const DEFAULT_VALUES: FormData = {
   title: '',
@@ -295,15 +295,15 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto pb-12" noValidate>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-slate-100 dark:text-white">
+          <h2 className="text-2xl font-black text-slate-100">
             {mode === 'edit' ? 'Editar Recurso' : 'Crear Nuevo Recurso'}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Completa los datos para publicar el material educativo.</p>
+          <p className="text-sm text-slate-400 mt-1">Completa los datos para publicar el material educativo.</p>
         </div>
         <button 
           type="button" 
           onClick={() => router.back()}
-          className="flex items-center gap-2 p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 text-sm font-bold transition-all"
+          className="flex items-center gap-2 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition-all"
         >
           <ArrowLeft size={18} />
           Volver
@@ -313,7 +313,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Main Info */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="card-startup p-6!">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6">
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Título del recurso</label>
@@ -359,7 +359,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
             </div>
           </div>
 
-          <div className="card-startup p-6!">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Taxonomía del Recurso</h3>
@@ -384,8 +384,8 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
                         className={cn(
                           "cursor-pointer flex items-center justify-between p-3 rounded-xl border transition-all",
                           watchedLevels.includes(level.id) 
-                            ? "bg-violet-500/5 border-violet-500/50 text-violet-700 dark:text-violet-400" 
-                            : "bg-white/5 border-slate-200 dark:border-white/5 text-slate-500 hover:border-slate-300 dark:hover:border-white/20"
+                            ? "bg-violet-900/40 border-violet-500/40 text-violet-300" 
+                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
                         )}
                       >
                         <span className="text-xs font-bold leading-none">{level.name}</span>
@@ -411,8 +411,8 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
                         className={cn(
                           "cursor-pointer flex items-center justify-between p-3 rounded-xl border transition-all",
                           watchedCourses.includes(course.id) 
-                            ? "bg-indigo-500/5 border-indigo-500/50 text-indigo-700 dark:text-indigo-400" 
-                            : "bg-white/5 border-slate-200 dark:border-white/5 text-slate-500 hover:border-slate-300 dark:hover:border-white/20"
+                            ? "bg-indigo-900/40 border-indigo-500/40 text-indigo-300" 
+                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
                         )}
                       >
                         <span className="text-xs font-bold leading-none">{course.name}</span>
@@ -435,7 +435,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
 
         {/* Right Column - Status and Preview */}
         <div className="space-y-6">
-          <div className="card-startup p-6!">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6">
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Estado de publicación</label>
@@ -454,7 +454,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
                 </div>
                 {errors.cover_image_url && <p className="text-[11px] font-bold text-red-500 px-1 italic">{errors.cover_image_url.message}</p>}
                 
-                <div className="mt-4 aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10 overflow-hidden relative group">
+                <div className="mt-4 aspect-video rounded-2xl border-2 border-dashed border-slate-700 overflow-hidden relative group">
                   {coverPreview ? (
                     <img
                       src={coverPreview}
@@ -462,7 +462,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 gap-2">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 gap-2">
                       <ImageIcon size={32} />
                       <span className="text-[10px] font-black uppercase tracking-widest">Vista previa</span>
                     </div>
