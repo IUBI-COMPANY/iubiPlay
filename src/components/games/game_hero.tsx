@@ -74,12 +74,11 @@ export function GameHero({ games }: Props) {
               {/* Content */}
               <div className="relative z-10 flex h-full flex-col justify-end p-6 md:py-12 md:pr-12 md:pl-20 lg:py-16 lg:pr-16 lg:pl-24">
                 <div className="flex flex-col items-start gap-6 max-w-3xl">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md border border-violet-500/30">
-                    <Sparkles size={12} className="text-violet-400" />
-                    Destacado
-                  </div>
+                  
+                  
 
-                  <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl drop-shadow-sm wrap-anywhere line-clamp-3 md:line-clamp-none">
+      
+                  <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl pt-8 drop-shadow-sm wrap-anywhere line-clamp-3 md:line-clamp-none">
                     {game.title}
                   </h1>
 
@@ -89,7 +88,7 @@ export function GameHero({ games }: Props) {
                     </p>
                   )}
 
-                  <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex flex-wrap gap-4 pt-10">
                     <Link 
                       href={`/games/${game.slug}`}
                       className="btn-primary flex items-center gap-2 px-8 z-20"

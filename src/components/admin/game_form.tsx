@@ -15,6 +15,7 @@ import {
   AlertCircle,
   ArrowLeft, Zap, Check
 } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/src/lib/utils';
 
 const schema = yup.object({
@@ -93,8 +94,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
   const [messageSuccess, setMessageSuccess] = React.useState<string | null>(null);
   const [levels, setLevels] = React.useState<Category[]>([]);
   const [courses, setCourses] = React.useState<Category[]>([]);
-  const [categoriesError, setCategoriesError] = React.useState<string | null>(null);
-  const [autoFillError, setAutoFillError] = React.useState<string | null>(null);
+  // Eliminados: categoriesError, setCategoriesError, autoFillError, setAutoFillError
   const [autoFillLoading, setAutoFillLoading] = React.useState(false);
 
   const redirectUrl = useWatch({ control, name: 'redirect_url' });
@@ -131,7 +131,6 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
         const res = await fetch('/api/categories?is_active=true&limit=500');
         if (!res.ok) {
           if (!active) return;
-          setCategoriesError('No se pudieron cargar las categorías');
           return;
         }
 
@@ -148,10 +147,8 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
             JSON.stringify({ ts: Date.now(), items })
           );
         }
-      } catch (err: unknown) {
+      } catch {
         if (!active) return;
-        const message = err instanceof Error ? err.message : 'No se pudieron cargar las categorías';
-        setCategoriesError(message);
       }
     };
 
@@ -196,7 +193,7 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
       return;
     }
 
-    setAutoFillError(null);
+    // Eliminado setAutoFillError(null);
     setAutoFillLoading(true);
 
     try {
@@ -205,7 +202,6 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
       const json = await res.json().catch(() => null);
 
       if (!res.ok || !json?.data) {
-        setAutoFillError(json?.message ?? 'No se pudo obtener metadatos');
         return;
       }
 
@@ -241,7 +237,6 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
         setValue('courses', [courses[0].id], { shouldDirty: true, shouldValidate: true });
       }
     } catch {
-      setAutoFillError('No se pudo autocompletar');
     } finally {
       setAutoFillLoading(false);
     }
@@ -456,10 +451,14 @@ export function GameForm({ mode = 'create', gameId, initialData, initialSelectio
                 
                 <div className="mt-4 aspect-video rounded-2xl border-2 border-dashed border-slate-700 overflow-hidden relative group">
                   {coverPreview ? (
-                    <img
+                    <Image
                       src={coverPreview}
                       alt="Preview"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      style={{ objectFit: 'cover' }}
+                      sizes="(max-width: 768px) 100vw, 100vw"
+                      priority={true}
                     />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 gap-2">

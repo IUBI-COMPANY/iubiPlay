@@ -7,7 +7,6 @@ import type { Category } from '../../types/category';
 import { 
   Plus, 
   Search, 
-  Sparkles, 
   Trash2, 
   Edit3, 
   Eye, 
@@ -16,7 +15,6 @@ import {
   CheckCircle2,
   Archive,
   Filter,
-  LogOut,
   ChevronRight,
   ChevronLeft,
   Gamepad2
@@ -38,9 +36,11 @@ type GamesResponse = {
 const inputClass =
   'w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-violet-500/50 focus:ring-4 focus:ring-violet-500/10 transition-all';
 
+
+// Cache key and TTL for categories (see category usage in other admin components):
+// const CATEGORIES_CACHE_KEY = 'iubiplay:categories:active';
+// const CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
 const PAGE_SIZE = 10;
-const CATEGORIES_CACHE_KEY = 'iubiplay:categories:active';
-const CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export function GamesTable() {
   const [items, setItems] = React.useState<Game[]>([]);
@@ -53,8 +53,7 @@ export function GamesTable() {
   const [total, setTotal] = React.useState(0);
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('');
-  const [categoryIds, setCategoryIds] = React.useState<string[]>([]);
-  const [categories, setCategories] = React.useState<Category[]>([]);
+  // Eliminados: categoryIds, setCategoryIds, categories
   const [page, setPage] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -62,35 +61,7 @@ export function GamesTable() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const loadCategories = React.useCallback(async () => {
-    try {
-      if (typeof window !== 'undefined') {
-        const cached = window.sessionStorage.getItem(CATEGORIES_CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached) as { ts: number; items: Category[] };
-          if (Date.now() - parsed.ts < CATEGORIES_CACHE_TTL_MS) {
-            setCategories(Array.isArray(parsed.items) ? parsed.items : []);
-            return;
-          }
-        }
-      }
-
-      const res = await fetch('/api/categories?is_active=true&limit=500');
-      if (!res.ok) return;
-      const data = (await res.json()) as { items: Category[] };
-      const items = Array.isArray(data.items) ? data.items : [];
-      setCategories(items);
-
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem(
-          CATEGORIES_CACHE_KEY,
-          JSON.stringify({ ts: Date.now(), items })
-        );
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
+  // Eliminada función loadCategories y toda referencia a categories
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -99,7 +70,6 @@ export function GamesTable() {
       const params = new URLSearchParams();
       if (search.trim()) params.set('search', search.trim());
       if (status) params.set('status', status);
-      if (categoryIds.length) params.set('category_ids', categoryIds.join(','));
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String((page - 1) * PAGE_SIZE));
 
@@ -121,11 +91,9 @@ export function GamesTable() {
     } finally {
       setLoading(false);
     }
-  }, [search, status, categoryIds, page]);
+  }, [search, status, page]);
 
-  React.useEffect(() => {
-    void loadCategories();
-  }, [loadCategories]);
+  // Eliminado useEffect de loadCategories
 
   React.useEffect(() => {
     void load();
@@ -290,6 +258,7 @@ export function GamesTable() {
                 <tr key={game.id} className="group hover:bg-slate-800 transition-colors">
                   <td className="px-6 py-4">
                     <div className="relative h-12 w-20 overflow-hidden rounded-xl border border-slate-700 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={game.cover_image_url || '/file.svg'}
                         alt={game.title}
