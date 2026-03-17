@@ -1,7 +1,5 @@
 "use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { getBrowserSupabaseClient } from '@/src/lib/supabase/client';
 import { useEffect, useState } from 'react';
 
