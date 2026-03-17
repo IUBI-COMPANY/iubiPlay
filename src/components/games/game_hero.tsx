@@ -18,6 +18,7 @@ type Props = {
 const fallbackCover = '/file.svg';
 
 export function GameHero({ games }: Props) {
+
   if (!games || games.length === 0) {
     return (
       <section className="card-startup min-h-[300px] flex items-center justify-center">
@@ -92,6 +93,7 @@ export function GameHero({ games }: Props) {
                     <Link 
                       href={`/games/${game.slug}`}
                       className="btn-primary flex items-center gap-2 px-8 z-20"
+                      aria-label={`Ver detalles de ${game.title}`}
                     >
                       <Play size={18} fill="currentColor" />
                       Ver Detalles

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Game } from '@/src/types/game';
@@ -18,6 +20,7 @@ export function GameCard({ game, priority = false }: Props) {
     <Link
       href={href}
       className="card-startup w-full flex flex-col group overflow-hidden"
+      aria-label={`Ver detalles de ${game.title}`}
     >
       <div className="card-startup-inner p-0! flex flex-col h-full overflow-hidden">
         <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-white/5">
@@ -46,7 +49,6 @@ export function GameCard({ game, priority = false }: Props) {
               </p>
             )}
           </div>
-          
           <div className="flex items-center gap-2 mt-2">
             <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white">Recurso</span>
