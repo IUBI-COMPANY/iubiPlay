@@ -1,15 +1,49 @@
+
+"use client";
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuthUser } from '@/src/hooks/useAuthUser';
+import { useRouter } from 'next/navigation';
 import { GameGallery } from '@/src/components/games/game_gallery';
 import { getGameBySlug, listGames } from '@/src/lib/db/games';
 import { ArrowLeft, Play, LayoutDashboard, Share2, Sparkles } from 'lucide-react';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
+import type { Game } from '@/src/types/game';
 
+type RelatedList = { items: Game[]; total?: number; summary?: unknown };
 type Props = { params: Promise<{ slug: string }> };
 
-export default async function GameDetailPage({ params }: Props) {
-  const { slug } = await params;
-  const game = await getGameBySlug(slug);
 
+export default function GameDetailPage({ params }: Props) {
+  const [game, setGame] = useState<Game | null>(null);
+  const [relatedList, setRelatedList] = useState<RelatedList>({ items: [] });
+  const [loading, setLoading] = useState<boolean>(true);
+  const { user, loading: authLoading } = useAuthUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const { slug } = await params;
+      const g = await getGameBySlug(slug);
+      setGame(g);
+      const rl = await listGames({ status: 'published', limit: 6, throwOnError: false });
+      setRelatedList(rl);
+      setLoading(false);
+    })();
+  }, [params]);
+
+  const handlePlay = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (authLoading) {
+      e.preventDefault();
+      return;
+    }
+    if (!user) {
+      e.preventDefault();
+      router.push(`/auth/login?redirectTo=${encodeURIComponent(game?.redirect_url || '#')}`);
+    }
+  }, [user, authLoading, router, game]);
+
+  if (loading) return <main className="min-h-[50vh] flex items-center justify-center"><span className="text-lg font-bold animate-pulse">Cargando...</span></main>;
   if (!game) {
     return (
       <main className="min-h-[50vh] flex flex-col items-center justify-center">
@@ -19,15 +53,12 @@ export default async function GameDetailPage({ params }: Props) {
     );
   }
 
-  // Prepara imágenes para la galería (simulando si no hay 3 al menos repetimos la portada para el efecto)
   const baseImg = game.cover_image_url || game.hero_image_url || '/file.svg';
   const imagesForGallery = [
     baseImg,
     game.hero_image_url || baseImg,
     baseImg
   ];
-
-  const relatedList = await listGames({ status: 'published', limit: 6, throwOnError: false });
 
   return (
     <main className="space-y-12 pb-12">
@@ -72,6 +103,8 @@ export default async function GameDetailPage({ params }: Props) {
               href={game.redirect_url || "#"} 
               target={game.redirect_url ? "_blank" : undefined}
               className="w-full btn-primary h-14 flex items-center justify-center gap-3 text-lg font-bold shadow-xl shadow-violet-500/20"
+              onClick={handlePlay}
+              aria-label="Comenzar a jugar"
             >
               <Play size={24} fill="currentColor" />
               Comenzar a Jugar

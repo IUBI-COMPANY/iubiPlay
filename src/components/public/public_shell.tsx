@@ -259,7 +259,7 @@ export function PublicShell({ children, navItems }: Props) {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl text-slate-500 hover:text-red-500 hover:bg-red-50/50 transition-colors"
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl text-slate-500 hover:text-red-500 hover:bg-white transition-colors"
                   >
                     <LogOut size={20} />
                   </button>
