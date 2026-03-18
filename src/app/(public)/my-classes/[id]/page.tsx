@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuthUser } from "@/src/hooks/useAuthUser";
 import type { Game } from "@/src/types/game";
 
@@ -73,12 +74,13 @@ export default function MyClassDetailPage({ params }: Props) {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {games.map((game) => (
             <li key={game.id} className="rounded-3xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/10">
-              <div className="w-full h-40 rounded-2xl overflow-hidden bg-slate-800 mb-3">
-                <img
+              <div className="relative w-full h-40 rounded-2xl overflow-hidden bg-slate-800 mb-3">
+                <Image
                   src={game.cover_image_url || game.hero_image_url || "/file.svg"}
                   alt={game.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
                 />
               </div>
               <h2 className="font-bold text-white">{game.title}</h2>

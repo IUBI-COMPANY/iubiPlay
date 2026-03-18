@@ -6,7 +6,7 @@ import { useAuthUser } from '@/src/hooks/useAuthUser';
 import { useRouter } from 'next/navigation';
 import { GameGallery } from '@/src/components/games/game_gallery';
 import { getGameBySlug, listGames } from '@/src/lib/db/games';
-import { ArrowLeft, Play, LayoutDashboard, Share2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Play, Sparkles } from 'lucide-react';
 import { AddToClassButton } from '@/src/components/classes/add_to_class_button';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
 import type { Game } from '@/src/types/game';
