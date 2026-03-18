@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useAuthUser } from '@/src/hooks/useAuthUser';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -40,84 +41,22 @@ type Props = {
 
 export function PublicShell({ children, navItems }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [authUser, setAuthUser] = React.useState<{ username: string | null; email: string | null } | null>(null);
-  const [authReady, setAuthReady] = React.useState(false);
-
+  const { user, loading: authLoading } = useAuthUser();
   const pathname = usePathname();
-
   const closeMenu = () => setIsOpen(false);
-
- 
-
-  React.useEffect(() => {
-    let active = true;
-
-
-    const loadUser = async () => {
-      try {
-        let res = await fetch('/api/auth/me', {
-          credentials: 'include',
-          cache: 'no-store',
-        });
-        if (res.status === 401) {
-          // Fallback: intenta obtener el token con el SDK de Supabase
-          try {
-            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
-            const supabase = getBrowserSupabaseClient();
-            const { data: sessionData } = await supabase.auth.getSession();
-            const accessToken = sessionData?.session?.access_token;
-            if (accessToken) {
-              res = await fetch('/api/auth/me', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                cache: 'no-store',
-              });
-            }
-          } catch {}
-        }
-        if (!res.ok) {
-          if (active) setAuthUser(null);
-          return;
-        }
-        const json = (await res.json()) as {
-          ok?: boolean;
-          user?: { username?: string | null; email?: string | null };
-        };
-        if (active && json?.ok && json.user) {
-          setAuthUser({
-            username: json.user.username ?? null,
-            email: json.user.email ?? null,
-          });
-        }
-      } catch (e) {
-        console.error("Auth check failed", e);
-      } finally {
-        if (active) setAuthReady(true);
-      }
-    };
-
-    loadUser();
-
-    return () => {
-      active = false;
-    };
-  }, [pathname]);
 
   const handleLogout = React.useCallback(async () => {
     try {
-      // Cierra sesión en Supabase (incluye Google OAuth)
       const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
       const supabase = getBrowserSupabaseClient();
       await supabase.auth.signOut();
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch (e) {
       console.error('Logout error', e);
-    } finally {
-      setAuthUser(null);
-      setAuthReady(true);
     }
   }, []);
 
-  const displayName = authUser?.username ?? authUser?.email ?? null;
+  const displayName = user?.username ?? user?.email ?? null;
 
   // Function to get icon based on item label
   const getIcon = (label: string, iconName?: string) => {
@@ -201,6 +140,8 @@ export function PublicShell({ children, navItems }: Props) {
               </Link>
             );
           })}
+
+          {/* Mis Clases removido del sidebar */}
         </nav>
 
         <div className="p-6">
@@ -243,8 +184,15 @@ export function PublicShell({ children, navItems }: Props) {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3 shrink-0">
-              {displayName ? (
+              {authLoading ? null : user ? (
                 <div className="flex items-center gap-2">
+                  <Link
+                    href="/my-classes"
+                    className="hidden sm:flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-700 transition-all hover:scale-[1.02] active:scale-95"
+                  >
+                    <BookText className="w-4 h-4" />
+                    Ver Mis Clases
+                  </Link>
                   <Link
                     href="/admin/games/new"
                     className="hidden sm:flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-700 transition-all hover:scale-[1.02] active:scale-95"
@@ -264,22 +212,22 @@ export function PublicShell({ children, navItems }: Props) {
                     <LogOut size={20} />
                   </button>
                 </div>
-              ) : authReady ? (
+              ) : (
                 <div className="flex items-center gap-2">
-              <Link 
-                href="/auth/login" 
-                className="px-4 py-2 text-sm font-bold text-white hover:text-slate-300 transition-colors"
-              >
-                Entrar
-              </Link>
-              <Link 
-                href="/auth/register" 
-                className="btn-primary"
-              >
-                Regístrate
-              </Link>
-            </div>
-              ) : null}
+                  <Link 
+                    href="/auth/login" 
+                    className="px-4 py-2 text-sm font-bold text-white hover:text-slate-300 transition-colors"
+                  >
+                    Entrar
+                  </Link>
+                  <Link 
+                    href="/auth/register" 
+                    className="btn-primary"
+                  >
+                    Regístrate
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </header>

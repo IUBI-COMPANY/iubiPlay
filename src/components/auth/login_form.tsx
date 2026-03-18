@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import type { Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { getBrowserSupabaseClient } from '@/src/lib/supabase/client';
+import { useAuthUser } from '@/src/hooks/useAuthUser';
 
 const schema = yup.object({
     email: yup.string().trim().required('Email requerido').email('Email inválido'),
@@ -22,6 +23,7 @@ interface Props {
 
 export default function LoginForm({ redirectTo, onSuccess }: Props) {
     const router = useRouter();
+    const { refresh } = useAuthUser();
     const {
         register,
         handleSubmit,
@@ -54,6 +56,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
             }
 
             onSuccess?.(null as unknown as Session);
+            await refresh();
             router.push(redirectTo ?? '/');
             return;
         } catch {
@@ -78,13 +81,38 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
     const handleGoogleLogin = async () => {
         setMessageError(null);
         const supabase = getBrowserSupabaseClient();
+        const nextPath = redirectTo ?? '/';
+        const nextParam = encodeURIComponent(nextPath.startsWith('/') ? nextPath : '/');
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: `${window.location.origin}/auth/callback?next=${nextParam}`,
             },
         });
         if (error) setMessageError(error.message);
+    };
+
+    // Password reset
+    const [resetEmail, setResetEmail] = React.useState<string>('');
+    const [resetSent, setResetSent] = React.useState<boolean>(false);
+    const [resetError, setResetError] = React.useState<string | null>(null);
+    const handlePasswordReset = async () => {
+        setResetError(null);
+        setResetSent(false);
+        const email = resetEmail || (document.getElementById('login-email') as HTMLInputElement)?.value;
+        if (!email) {
+            setResetError('Por favor ingresa tu email');
+            return;
+        }
+        const supabase = getBrowserSupabaseClient();
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/v1/callback`,
+        });
+        if (error) {
+            setResetError(error.message);
+        } else {
+            setResetSent(true);
+        }
     };
 
     return (
@@ -125,7 +153,22 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                     <label htmlFor="login-password" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
                         Contraseña
                     </label>
-                    <button type="button" className="text-xs font-semibold text-slate-400 hover:text-violet-600 transition-colors">
+                    <button
+                        type="button"
+                        className="text-xs font-semibold text-slate-400 hover:text-violet-600 transition-colors"
+                        onClick={() => {
+                            const email = (document.getElementById('login-email') as HTMLInputElement)?.value || '';
+                            setResetEmail(email);
+                            setResetSent(false);
+                            setResetError(null);
+                            // Show prompt
+                            const input = window.prompt('Introduce tu email para recuperar la contraseña:', email);
+                            if (input) {
+                                setResetEmail(input);
+                                handlePasswordReset();
+                            }
+                        }}
+                    >
                         Olvidé mi contraseña
                     </button>
                 </div>
@@ -147,6 +190,12 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                 </div>
                 {errors.password && (
                     <p className="text-xs font-medium text-red-500 mt-1">{errors.password.message}</p>
+                )}
+                {resetError && (
+                    <p className="text-xs font-medium text-red-500 mt-1">{resetError}</p>
+                )}
+                {resetSent && (
+                    <p className="text-xs font-medium text-green-600 mt-1">Se ha enviado un correo para recuperar tu contraseña.</p>
                 )}
             </div>
 
