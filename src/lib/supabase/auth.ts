@@ -75,6 +75,37 @@ export async function getAuthedClientFromRequest(req: NextRequest): Promise<{
   return { client: null, error: 'No autenticado' };
 }
 
+export async function getUserIdFromRequest(req: NextRequest): Promise<{
+  userId: string | null;
+  refreshedSession?: Session;
+  error?: string;
+}> {
+  const accessToken = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
+
+  if (!accessToken && !refreshToken) {
+    return { userId: null, error: 'No autenticado' };
+  }
+
+  const anonClient = createAnonClient();
+
+  if (accessToken) {
+    const { data, error } = await anonClient.auth.getUser(accessToken);
+    if (!error && data?.user?.id) {
+      return { userId: data.user.id };
+    }
+  }
+
+  if (refreshToken) {
+    const { data, error } = await anonClient.auth.refreshSession({ refresh_token: refreshToken });
+    if (!error && data?.session && data.user?.id) {
+      return { userId: data.user.id, refreshedSession: data.session };
+    }
+  }
+
+  return { userId: null, error: 'No autenticado' };
+}
+
 export async function getWriteClientFromRequest(req: NextRequest): Promise<{
   client: SupabaseClient | null;
   refreshedSession?: Session;

@@ -9,31 +9,60 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     async function syncSessionAndRedirect() {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const nextParam = params.get("next") ?? "/";
+        const safeNext = nextParam.startsWith("/") ? nextParam : "/";
+
         const { getBrowserSupabaseClient } = await import("@/src/lib/supabase/client");
         const supabase = getBrowserSupabaseClient();
-        // Forzar la sincronización de la sesión
-        await supabase.auth.getSession();
-        // Ahora consulta el usuario
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[Auth Callback] session:", sessionData?.session ? "[OK]" : "[NO]");
+        }
+        if (sessionData?.session) {
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              access_token: sessionData.session.access_token,
+              refresh_token: sessionData.session.refresh_token,
+              expires_in: sessionData.session.expires_in,
+            }),
+          });
+        }
+
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[Auth Callback] /api/auth/me status:", res.status);
+        }
+        if (!res.ok) {
           router.replace("/auth/login");
           return;
         }
-        // Busca el perfil en la tabla profiles
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username,email,id")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (!profile?.username) {
-          router.replace(`/auth/google-username?email=${encodeURIComponent(profile?.email || user.email || "")}&id=${encodeURIComponent(user.id)}`);
+
+        const data = await res.json();
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[Auth Callback] user:", data?.user ?? null);
+        }
+        const user = data?.user ?? null;
+        if (!user?.id) {
+          router.replace("/auth/login");
+          return;
+        }
+
+        if (!user.username) {
+          router.replace(
+            `/auth/google-username?email=${encodeURIComponent(user.email || "")}&id=${encodeURIComponent(user.id)}`
+          );
         } else {
-          router.replace("/");
+          router.replace(safeNext);
         }
       } catch {
         router.replace("/auth/login");
       }
     }
+
     syncSessionAndRedirect();
   }, [router]);
 

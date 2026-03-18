@@ -16,6 +16,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/src/lib/utils';
+import { useAuthUser } from '@/src/hooks/useAuthUser';
 
 type Props = {
   children: React.ReactNode;
@@ -29,101 +30,24 @@ const navItems = [
 export function AdminShell({ children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAuthChecking, setIsAuthChecking] = React.useState(true);
-  const [authUser, setAuthUser] = React.useState<{ username: string | null; email: string | null; role?: string | null } | null>(null);
+  const { user, loading: authLoading } = useAuthUser();
+  const isAllowed = user?.role === 'admin' || user?.role === 'user';
 
   // Close menu when route changes
   React.useEffect(() => {
     // setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Auth check
   React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        let res = await fetch('/api/auth/me', { credentials: 'include' });
-        if (res.status === 401) {
-          // Fallback: intenta obtener el token con el SDK de Supabase
-          try {
-            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
-            const supabase = getBrowserSupabaseClient();
-            const { data: sessionData } = await supabase.auth.getSession();
-            const accessToken = sessionData?.session?.access_token;
-            if (accessToken) {
-              res = await fetch('/api/auth/me', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                cache: 'no-store',
-              });
-            }
-          } catch {}
-        }
-        if (!res.ok) {
-          router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
-          return;
-        }
-        const data = await res.json();
-        const userRole = data?.user?.role ?? null;
-        if (userRole !== 'user' && userRole !== 'admin') {
-          router.push('/');
-          return;
-        }
-        setAuthUser({
-          username: data?.user?.username ?? null,
-          email: data?.user?.email ?? null,
-          role: userRole,
-        });
-        setIsAuthChecking(false);
-      } catch (e) {
-        console.error("Auth check failed", e);
-        router.push('/');
-      }
-    };
-    checkAuth();
-  }, [router, pathname]);
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        let res = await fetch('/api/auth/me', { credentials: 'include' });
-        if (res.status === 401) {
-          // Fallback: intenta obtener el token con el SDK de Supabase
-          try {
-            const { getBrowserSupabaseClient } = await import('@/src/lib/supabase/client');
-            const supabase = getBrowserSupabaseClient();
-            const { data: sessionData } = await supabase.auth.getSession();
-            const accessToken = sessionData?.session?.access_token;
-            if (accessToken) {
-              res = await fetch('/api/auth/me', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                cache: 'no-store',
-              });
-            }
-          } catch (e) {
-            console.error('Fallback auth error', e);
-          }
-        }
-        if (!res.ok) {
-          router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
-          return;
-        }
-        const data = await res.json();
-        const userRole = data?.user?.role ?? null;
-        if (userRole !== 'admin' && userRole !== 'user') {
-          router.push('/');
-          return;
-        }
-        setAuthUser({
-          username: data?.user?.username ?? null,
-          email: data?.user?.email ?? null,
-          role: userRole,
-        });
-        setIsAuthChecking(false);
-      } catch (e) {
-        console.error("Auth check failed", e);
-        router.push('/');
-      }
-    };
-    checkAuth();
-  }, [router, pathname]);
+    if (authLoading) return;
+    if (!user) {
+      router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
+      return;
+    }
+    if (!isAllowed) {
+      router.push('/');
+    }
+  }, [authLoading, user, isAllowed, router, pathname]);
 
   const handleLogout = async () => {
     try {
@@ -187,10 +111,10 @@ export function AdminShell({ children }: Props) {
               <h1 className="text-sm md:text-lg font-black tracking-tight text-white uppercase">Colabora con la Comunidad</h1>
             </div>
             <div className="flex items-center gap-3">
-              {authUser && (
+              {user && (
                 <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-2xl glass-panel text-sm font-medium text-white">
                   <User size={16} className="text-violet-500" />
-                  <span className="truncate max-w-[120px]">{authUser.username || authUser.email}</span>
+                  <span className="truncate max-w-[120px]">{user.username || user.email}</span>
                 </div>
               )}
               <button
@@ -205,7 +129,7 @@ export function AdminShell({ children }: Props) {
         </header>
         {/* Page Content */}
         <main className="flex-1 px-4 py-6 md:px-8">
-          {isAuthChecking ? (
+          {authLoading ? (
             <div className="flex h-[50vh] items-center justify-center">
               <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
             </div>

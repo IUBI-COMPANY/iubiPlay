@@ -5,9 +5,14 @@ import { setAuthCookies } from '@/src/lib/auth/cookies';
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
+  const nextParam = url.searchParams.get('next') ?? '/';
+  const safeNext = nextParam.startsWith('/') ? nextParam : '/';
 
-  console.log('[OAuth Callback] URL:', req.url);
-  console.log('[OAuth Callback] Code:', code);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[OAuth Callback] URL:', req.url);
+    console.log('[OAuth Callback] Code:', code);
+    console.log('[OAuth Callback] Next:', safeNext);
+  }
 
   if (!code) {
     console.log('[OAuth Callback] Falta el parámetro code');
@@ -33,14 +38,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login?error=auth_callback', req.url));
   }
 
-  console.log('[OAuth Callback] Sesión obtenida:', {
-    user: data.session.user?.id,
-    access_token: data.session.access_token ? '[OK]' : '[NO]',
-    refresh_token: data.session.refresh_token ? '[OK]' : '[NO]',
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[OAuth Callback] Sesión obtenida:', {
+      user: data.session.user?.id,
+      access_token: data.session.access_token ? '[OK]' : '[NO]',
+      refresh_token: data.session.refresh_token ? '[OK]' : '[NO]',
+    });
+  }
 
-  const res = NextResponse.redirect(new URL('/', req.url));
+  const res = NextResponse.redirect(new URL(`/auth/callback?next=${encodeURIComponent(safeNext)}`, req.url));
   setAuthCookies(res, data.session);
-  console.log('[OAuth Callback] Cookies seteadas');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[OAuth Callback] Cookies seteadas');
+  }
   return res;
 }

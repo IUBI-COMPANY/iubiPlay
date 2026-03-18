@@ -5,7 +5,6 @@ import { setAuthCookies } from '@/src/lib/auth/cookies';
 const ACCESS_TOKEN_COOKIE = 'sb-access-token';
 const REFRESH_TOKEN_COOKIE = 'sb-refresh-token';
 
-
 export async function GET(req: NextRequest) {
   // Permite token por header Authorization o cookie
   const authHeader = req.headers.get('authorization');
@@ -14,6 +13,7 @@ export async function GET(req: NextRequest) {
     : req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
   const sessionTokenCookie = req.cookies.get('session_token')?.value;
+  const debug = process.env.NODE_ENV !== 'production';
 
   if (!token && !refreshToken) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
@@ -43,12 +43,18 @@ export async function GET(req: NextRequest) {
         .eq('id', data.user.id)
         .maybeSingle();
       // Validación de sesión única
+      if (debug) {
+        console.log('[auth/me] user:', data.user.id);
+        console.log('[auth/me] session_token cookie:', sessionTokenCookie ?? '[none]');
+        console.log('[auth/me] session_token profile:', profile?.session_token ?? '[none]');
+      }
       if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
         return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
       }
       return NextResponse.json({
         ok: true,
         user: {
+          id: data.user.id,
           username: profile?.username ?? null,
           email: data.user.email ?? null,
           role: profile?.role ?? 'user',
@@ -76,6 +82,11 @@ export async function GET(req: NextRequest) {
     .maybeSingle();
 
   // Validación de sesión única
+  if (debug) {
+    console.log('[auth/me] user (refresh):', refreshData.user.id);
+    console.log('[auth/me] session_token cookie:', sessionTokenCookie ?? '[none]');
+    console.log('[auth/me] session_token profile:', profile?.session_token ?? '[none]');
+  }
   if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
     return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
   }
@@ -83,6 +94,7 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.json({
     ok: true,
     user: {
+      id: refreshData.user.id,
       username: profile?.username ?? null,
       email: refreshData.user.email ?? null,
       role: profile?.role ?? 'user',
@@ -92,5 +104,3 @@ export async function GET(req: NextRequest) {
   setAuthCookies(res, refreshData.session);
   return res;
 }
-
-
