@@ -157,7 +157,7 @@ export function PublicShell({ children, navItems }: Props) {
         {/* Header */}
         <header 
           className={cn(
-            "sticky top-0 z-40 w-full transition-all duration-200 px-4 py-6 md:px-8"
+            "sticky top-0 z-50 w-full transition-all duration-200 px-4 py-6 md:px-8 bg-slate-950/90 backdrop-blur border-b border-white/10"
           )}
         >
           <div className="mx-auto flex w-full items-center justify-between gap-2 md:gap-4 min-w-0">
@@ -200,10 +200,13 @@ export function PublicShell({ children, navItems }: Props) {
                     <Plus className="w-4 h-4" />
                     Contribuir
                   </Link>
-                  <div className="flex items-center gap-2 rounded-2xl glass-panel px-4 py-2 text-sm font-medium">
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 rounded-2xl glass-panel px-4 py-2 text-sm font-medium hover:text-violet-200 transition-colors"
+                  >
                     <User size={16} className="text-violet-500" />
                     <span>{displayName}</span>
-                  </div>
+                  </Link>
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -262,7 +265,10 @@ export function PublicShell({ children, navItems }: Props) {
                 className="fixed inset-y-0 left-0 z-70 w-72 bg-slate-900 text-white shadow-2xl md:hidden"
               >
                 <div className="flex items-center justify-between p-6">
-                  <span className="text-lg font-bold text-violet-600">IUBIPLAY</span>
+                  <span className="text-lg font-bold">
+                    <span className="text-white">IUBI</span>
+                    <span className="text-violet-600">PLAY</span>
+                  </span>
                   <button
                     type="button"
                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800"
@@ -272,6 +278,16 @@ export function PublicShell({ children, navItems }: Props) {
                   </button>
                 </div>
                 <nav className="mt-4 px-4 space-y-2">
+                  {!authLoading && user && (
+                    <Link
+                      href="/my-classes"
+                      onClick={closeMenu}
+                      className="nav-link text-white hover:text-violet-400"
+                    >
+                      <BookText size={18} />
+                      Ver Mis Clases
+                    </Link>
+                  )}
                   {navItems.map((item) => (
                     <Link
                       key={item.label}
