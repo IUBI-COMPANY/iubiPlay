@@ -157,7 +157,7 @@ export function PublicShell({ children, navItems }: Props) {
         {/* Header */}
         <header 
           className={cn(
-            "sticky top-0 z-50 w-full transition-all duration-200 px-4 py-6 md:px-8 bg-slate-950/90 backdrop-blur border-b border-white/10"
+            "sticky top-0 z-50 w-full transition-all duration-200 px-4 py-6 md:px-8 bg-slate-900/95 backdrop-blur border-b border-white/10"
           )}
         >
           <div className="mx-auto flex w-full items-center justify-between gap-2 md:gap-4 min-w-0">
@@ -236,7 +236,7 @@ export function PublicShell({ children, navItems }: Props) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 px-4 py-6 md:px-8">
+        <main className="flex-1 px-4 py-6 md:px-8 bg-slate-900/60">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -245,6 +245,21 @@ export function PublicShell({ children, navItems }: Props) {
             {children}
           </motion.div>
         </main>
+
+        <footer className="border-t border-white/10 bg-slate-900/80 px-6 py-8 md:px-8">
+          <div className="mx-auto flex w-full flex-col items-start justify-between gap-6 text-sm text-slate-400 md:flex-row md:items-center">
+            <div className="font-semibold text-white">
+              <span className="text-white">IUBI</span>
+              <span className="text-violet-500">PLAY</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/games" className="hover:text-violet-300 transition-colors">Juegos</Link>
+              <Link href="/my-classes" className="hover:text-violet-300 transition-colors">Mis Clases</Link>
+              <Link href="/profile" className="hover:text-violet-300 transition-colors">Perfil</Link>
+            </div>
+            <div className="text-xs text-slate-500">© {new Date().getFullYear()} IUBIPLAY</div>
+          </div>
+        </footer>
 
         {/* Mobile Sidebar */}
         <AnimatePresence>

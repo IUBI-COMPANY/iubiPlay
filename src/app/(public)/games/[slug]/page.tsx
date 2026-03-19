@@ -10,6 +10,7 @@ import { getProfileById } from '@/src/lib/db/profiles';
 import { ArrowLeft, Play, Sparkles } from 'lucide-react';
 import { AddToClassButton } from '@/src/components/classes/add_to_class_button';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
+import { Loader } from '@/src/components/ui/loader';
 import type { Game } from '@/src/types/game';
 
 type RelatedList = { items: Game[]; total?: number; summary?: unknown };
@@ -52,7 +53,7 @@ export default function GameDetailPage({ params }: Props) {
     }
   }, [user, authLoading, router, game]);
 
-  if (loading) return <main className="min-h-[50vh] flex items-center justify-center"><span className="text-lg font-bold animate-pulse">Cargando...</span></main>;
+  if (loading) return <main className="min-h-[50vh] flex items-center justify-center"><Loader size={36} /></main>;
   if (!game) {
     return (
       <main className="min-h-[50vh] flex flex-col items-center justify-center">

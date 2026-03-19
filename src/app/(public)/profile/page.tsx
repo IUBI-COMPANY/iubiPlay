@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { useAuthUser } from "@/src/hooks/useAuthUser";
+import { Loader } from "@/src/components/ui/loader";
 import { getBrowserSupabaseClient } from "@/src/lib/supabase/client";
 
 const usernameSchema = z
@@ -27,15 +28,33 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [classes, setClasses] = useState<Array<{ id: string; name: string; gameCount?: number }>>([]);
+  const [loadingClasses, setLoadingClasses] = useState(false);
 
   useEffect(() => {
     setUsername(user?.username ?? "");
   }, [user?.username]);
 
+  useEffect(() => {
+    if (!user) return;
+    setLoadingClasses(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/classes?limit=6&page=1");
+        const data = await res.json();
+        if (res.ok) {
+          setClasses(Array.isArray(data?.items) ? data.items : []);
+        }
+      } finally {
+        setLoadingClasses(false);
+      }
+    })();
+  }, [user?.id]);
+
   if (loading) {
     return (
       <main className="min-h-[50vh] flex items-center justify-center">
-        <span className="text-lg font-bold animate-pulse">Cargando...</span>
+        <Loader size={36} />
       </main>
     );
   }
@@ -114,10 +133,6 @@ export default function ProfilePage() {
           <p className="text-xs font-semibold text-slate-400">Email</p>
           <p className="text-base font-semibold text-white">{user.email ?? "Sin email"}</p>
         </div>
-        <div>
-          <p className="text-xs font-semibold text-slate-400">Rol</p>
-          <p className="text-base font-semibold text-white">{user.role}</p>
-        </div>
       </section>
 
       <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 space-y-4">
@@ -140,6 +155,38 @@ export default function ProfilePage() {
             {saving ? "Guardando..." : "Guardar cambios"}
           </button>
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-slate-400">Mis clases</p>
+            <p className="text-[11px] text-slate-500">Accesos rápidos a tus clases</p>
+          </div>
+          <a href="/my-classes" className="text-xs font-semibold text-violet-300 hover:text-violet-200">
+            Ver todas
+          </a>
+        </div>
+        {loadingClasses ? (
+          <div className="text-sm text-slate-400">Cargando clases...</div>
+        ) : classes.length === 0 ? (
+          <div className="text-sm text-slate-400">Aún no tienes clases.</div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {classes.map((c) => (
+              <a
+                key={c.id}
+                href={`/my-classes/${c.id}`}
+                className="rounded-2xl border border-white/10 bg-slate-800 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate">{c.name}</span>
+                  <span className="text-[11px] text-slate-400">{c.gameCount ?? 0} juegos</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 space-y-4">

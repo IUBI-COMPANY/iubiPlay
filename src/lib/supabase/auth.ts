@@ -113,10 +113,5 @@ export async function getWriteClientFromRequest(req: NextRequest): Promise<{
 }> {
   const auth = await getAuthedClientFromRequest(req);
   if (!auth.client) return auth;
-
-  if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return { client: null, error: 'SUPABASE_SERVICE_ROLE_KEY requerido para operaciones de escritura' };
-  }
-
-  return { client: createServiceClient(), refreshedSession: auth.refreshedSession };
+  return { client: auth.client, refreshedSession: auth.refreshedSession };
 }

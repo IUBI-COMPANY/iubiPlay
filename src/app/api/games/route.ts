@@ -4,8 +4,9 @@ import type { Game, GameStatus } from '@/src/types/game';
 import type { CategorySelections } from '@/src/types/category';
 import { createGame, listGames } from '@/src/lib/db/games';
 import { getCategoriesByGameIds, setGameCategories, validateCategorySelections } from '@/src/lib/db/categories';
-import { getWriteClientFromRequest } from '@/src/lib/supabase/auth';
+import { getUserIdFromRequest, getWriteClientFromRequest } from '@/src/lib/supabase/auth';
 import { setAuthCookies } from '@/src/lib/auth/cookies';
+import { createClient, type Session } from '@supabase/supabase-js';
 
 function parseStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
@@ -49,13 +50,50 @@ function parseCreateBody(data: unknown): CreateGameBody | null {
   };
 }
 
+async function getUserRole(req: NextRequest): Promise<{ userId: string | null; role: string; refreshedSession?: Session }> {
+  const auth = await getUserIdFromRequest(req);
+  if (!auth.userId) return { userId: null, role: 'anonymous' };
+
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return { userId: auth.userId, role: 'user', refreshedSession: auth.refreshedSession };
+  }
+
+  const accessToken =
+    req.cookies.get('sb-access-token')?.value ?? auth.refreshedSession?.access_token;
+
+  if (!accessToken) {
+    return { userId: auth.userId, role: 'user', refreshedSession: auth.refreshedSession };
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', auth.userId)
+    .maybeSingle();
+
+  return { userId: auth.userId, role: profile?.role ?? 'user', refreshedSession: auth.refreshedSession };
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get('status') as GameStatus | null;
+  const requestedStatus = searchParams.get('status') as GameStatus | null;
   const search = searchParams.get('search') ?? undefined;
   const categoryId = searchParams.get('category_id') ?? undefined;
   const limit = Math.min(Number(searchParams.get('limit') ?? 20), 50);
   const offset = Math.max(Number(searchParams.get('offset') ?? 0), 0);
+
+  const { role, refreshedSession } = await getUserRole(req);
+  const status =
+    requestedStatus && requestedStatus !== 'published' && role !== 'admin'
+      ? 'published'
+      : requestedStatus ?? undefined;
 
   const result = await listGames({
     status: status ?? undefined,
@@ -67,7 +105,11 @@ export async function GET(req: NextRequest) {
 
   const categoriesByGameId = await getCategoriesByGameIds(result.items.map((item) => item.id));
 
-  return NextResponse.json({ ...result, categoriesByGameId });
+  const res = NextResponse.json({ ...result, categoriesByGameId });
+  if (refreshedSession) {
+    setAuthCookies(res, refreshedSession);
+  }
+  return res;
 }
 
 export async function POST(req: NextRequest) {
@@ -75,6 +117,8 @@ export async function POST(req: NextRequest) {
   if (!auth.client) {
     return NextResponse.json({ ok: false, message: auth.error ?? 'No autenticado' }, { status: 401 });
   }
+
+  const authUser = await getUserIdFromRequest(req);
 
   const body = parseCreateBody(await req.json().catch(() => null));
   if (!body) {
@@ -110,6 +154,7 @@ export async function POST(req: NextRequest) {
         cover_image_url: body.cover_image_url,
         platform: body.platform,
         status: body.status ?? 'draft',
+        created_by: authUser.userId ?? undefined,
       },
       authedClient
     );
