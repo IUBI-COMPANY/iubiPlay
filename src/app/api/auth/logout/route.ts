@@ -5,9 +5,9 @@ const REFRESH_TOKEN_COOKIE = 'sb-refresh-token';
 
 export async function POST() {
   const res = NextResponse.json({ ok: true });
-  const cookieOptions = {
+  const cookieOptions: Partial<{ httpOnly: boolean; sameSite: "lax" | "strict" | "none"; secure: boolean; path: string; maxAge: number }> = {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: "lax",
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 0,
