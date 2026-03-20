@@ -146,6 +146,12 @@ export default function RegisterForm() {
 
             className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            minLength={3}
+            maxLength={20}
+            pattern="^[a-z0-9_]+$"
             required
             {...usernameRegister}
             aria-invalid={!!errors.username}
@@ -171,6 +177,11 @@ export default function RegisterForm() {
             placeholder="Introduce tu correo"
             className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={254}
             required
             {...emailRegister}
             aria-invalid={!!errors.email}
@@ -196,6 +207,8 @@ export default function RegisterForm() {
             placeholder="Crea una contraseña segura"
             className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
             autoComplete="new-password"
+            minLength={8}
+            maxLength={72}
             required
             {...passwordRegister}
             aria-invalid={!!errors.password}

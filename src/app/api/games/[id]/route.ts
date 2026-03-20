@@ -1,13 +1,12 @@
-import { NextResponse } from "next/server";
+  import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { GameStatus } from "@/src/types/game";
 import { deleteGame, getGameById, updateGame } from "@/src/lib/db/games";
 import type { CategorySelections } from "@/src/types/category";
-import { setGameCategories } from "@/src/lib/db/categories";
-import { validateCategorySelections } from "@/src/lib/db/categories";
-import { getWriteClientFromRequest } from "@/src/lib/supabase/auth";
+import { setGameCategories, validateCategorySelections } from "@/src/lib/db/categories";
+import { getUserIdFromRequest, getWriteClientFromRequest } from "@/src/lib/supabase/auth";
 import { setAuthCookies } from "@/src/lib/auth/cookies";
-
+import { createClient, type Session } from "@supabase/supabase-js";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -31,8 +30,7 @@ function parsePatchBody(data: unknown): PatchBody | null {
   const record = data as Record<string, unknown>;
   const body: PatchBody = {};
 
-  if (typeof record.status === "string")
-    body.status = record.status as GameStatus;
+  if (typeof record.status === "string") body.status = record.status as GameStatus;
   if (typeof record.title === "string") body.title = record.title.trim();
 
   const levels = parseStringArray(record.levels);
@@ -43,31 +41,64 @@ function parsePatchBody(data: unknown): PatchBody | null {
   return body;
 }
 
-export async function GET(_: NextRequest, { params }: Ctx) {
+async function getUserRole(req: NextRequest): Promise<{ userId: string | null; role: string; refreshedSession?: Session }> {
+  const auth = await getUserIdFromRequest(req);
+  if (!auth.userId) return { userId: null, role: "anonymous" };
+
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return { userId: auth.userId, role: "user", refreshedSession: auth.refreshedSession };
+  }
+
+  const accessToken =
+    req.cookies.get("sb-access-token")?.value ?? auth.refreshedSession?.access_token;
+
+  if (!accessToken) {
+    return { userId: auth.userId, role: "user", refreshedSession: auth.refreshedSession };
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", auth.userId)
+    .maybeSingle();
+
+  return { userId: auth.userId, role: profile?.role ?? "user", refreshedSession: auth.refreshedSession };
+}
+
+export async function GET(req: NextRequest, { params }: Ctx) {
   const { id } = await params;
   if (!id) {
-    return NextResponse.json(
-      { ok: false, message: "ID inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "ID inválido" }, { status: 400 });
   }
   const game = await getGameById(id);
   if (!game) {
-    return NextResponse.json(
-      { ok: false, message: "No encontrado" },
-      { status: 404 }
-    );
+    return NextResponse.json({ ok: false, message: "No encontrado" }, { status: 404 });
   }
+
+  if (game.status !== "published") {
+    const { userId, role, refreshedSession } = await getUserRole(req);
+    if (role !== "admin" && (!userId || game.created_by !== userId)) {
+      return NextResponse.json({ ok: false, message: "No encontrado" }, { status: 404 });
+    }
+    const res = NextResponse.json({ ok: true, item: game });
+    if (refreshedSession) setAuthCookies(res, refreshedSession);
+    return res;
+  }
+
   return NextResponse.json({ ok: true, item: game });
 }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   const { id } = await params;
   if (!id) {
-    return NextResponse.json(
-      { ok: false, message: "ID inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "ID inválido" }, { status: 400 });
   }
 
   const auth = await getWriteClientFromRequest(req);
@@ -75,36 +106,23 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ ok: false, message: auth.error ?? "No autenticado" }, { status: 401 });
   }
 
+  const authUser = await getUserIdFromRequest(req);
+
   const body = parsePatchBody(await req.json().catch(() => null));
   if (!body) {
-    return NextResponse.json(
-      { ok: false, message: "Body inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "Body inválido" }, { status: 400 });
   }
 
   if (body.status && !["draft", "published", "archived"].includes(body.status)) {
-    return NextResponse.json(
-      { ok: false, message: "Status inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "Status inválido" }, { status: 400 });
   }
 
   if ((body.levels && !body.courses) || (!body.levels && body.courses)) {
-    return NextResponse.json(
-      { ok: false, message: "Envia niveles y cursos juntos" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "Envía niveles y cursos juntos" }, { status: 400 });
   }
 
-  if (
-    (body.levels && body.levels.length === 0) ||
-    (body.courses && body.courses.length === 0)
-  ) {
-    return NextResponse.json(
-      { ok: false, message: "Selecciona al menos un nivel y un curso" },
-      { status: 400 }
-    );
+  if ((body.levels && body.levels.length === 0) || (body.courses && body.courses.length === 0)) {
+    return NextResponse.json({ ok: false, message: "Selecciona al menos un nivel y un curso" }, { status: 400 });
   }
 
   let selections: CategorySelections | undefined;
@@ -118,7 +136,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         authedClient
       );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Categorias invalidas";
+      const message = err instanceof Error ? err.message : "Categorias inválidas";
       return NextResponse.json({ ok: false, message }, { status: 400 });
     }
   }
@@ -129,13 +147,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const gamePatch = {
       status: body.status,
       title: body.title,
+      updated_by: authUser.userId ?? undefined,
     };
     const updated = await updateGame(id, gamePatch, authedClient);
     if (!updated) {
-      return NextResponse.json(
-        { ok: false, message: "No encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, message: "No encontrado" }, { status: 404 });
     }
 
     if (selections) {
@@ -149,20 +165,14 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Error interno";
-    return NextResponse.json(
-      { ok: false, message },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
   const { id } = await params;
   if (!id) {
-    return NextResponse.json(
-      { ok: false, message: "ID inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ ok: false, message: "ID inválido" }, { status: 400 });
   }
 
   const auth = await getWriteClientFromRequest(req);
@@ -175,10 +185,7 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
   try {
     const deleted = await deleteGame(id, authedClient);
     if (!deleted) {
-      return NextResponse.json(
-        { ok: false, message: "No encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, message: "No encontrado" }, { status: 404 });
     }
     const res = NextResponse.json({ ok: true, deleted: true });
     if (auth.refreshedSession) {
@@ -187,9 +194,6 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
     return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Error interno";
-    return NextResponse.json(
-      { ok: false, message },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }

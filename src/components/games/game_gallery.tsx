@@ -23,7 +23,7 @@ export function GameGallery({ title, images }: Props) {
   if (!images || images.length === 0) return null;
 
   return (
-    <div className="w-full flex gap-4 h-[400px] md:h-[500px]">
+    <div className="game-gallery w-full flex gap-4 h-[400px] md:h-[500px]">
       {/* Carrusel Vertical Izquierdo (Miniaturas) */}
       <div className="hidden md:block w-[120px] h-full">
         <Swiper
@@ -87,6 +87,12 @@ export function GameGallery({ title, images }: Props) {
         .gallery-thumbs .swiper-slide-thumb-active {
           opacity: 1 !important;
           border: 2px solid #8b5cf6;
+        }
+        @media (max-width: 768px) {
+          .game-gallery .swiper-button-next,
+          .game-gallery .swiper-button-prev {
+            display: none !important;
+          }
         }
       `}</style>
     </div>

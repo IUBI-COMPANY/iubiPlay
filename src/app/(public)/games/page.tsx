@@ -21,11 +21,12 @@ type Props = {
   searchParams?: {
     level?: string;
     page?: string;
+    search?: string;
   };
 };
 
 export default async function GamesPage({ searchParams }: Props) {
-  const { level, page: pageRaw } = (await searchParams) ?? {};
+  const { level, page: pageRaw, search } = (await searchParams) ?? {};
 
   // Obtener niveles y parsearlos para el filtro jerárquico
   const { items: allLevels } = await listCategories({ type: 'level', limit: 100 });
@@ -54,6 +55,7 @@ export default async function GamesPage({ searchParams }: Props) {
 
   const result = await listGames({
     status: 'published',
+    search,
     limit: PAGE_SIZE,
     offset,
     categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
@@ -61,8 +63,8 @@ export default async function GamesPage({ searchParams }: Props) {
   });
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
-  const prevQuery = buildQuery({ level, page: page > 1 ? page - 1 : undefined });
-  const nextQuery = buildQuery({ level, page: page < totalPages ? page + 1 : undefined });
+  const prevQuery = buildQuery({ level, search, page: page > 1 ? page - 1 : undefined });
+  const nextQuery = buildQuery({ level, search, page: page < totalPages ? page + 1 : undefined });
 
   return (
     <section className="space-y-6 rounded-xl">
@@ -105,7 +107,7 @@ export default async function GamesPage({ searchParams }: Props) {
 
       {result.items.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-slate-800 p-6 text-sm text-slate-300">
-          No se encontraron juegos con esos filtros.
+          {search ? `No se encontraron juegos para "${search}".` : "No se encontraron juegos con esos filtros."}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

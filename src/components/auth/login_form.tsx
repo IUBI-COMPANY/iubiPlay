@@ -41,12 +41,18 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
         setMessageError(null);
 
         try {
-            const res = await fetch('/api/auth/login', {
+            const res = await fetch('/api/auth/login' + (redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ email: values.email, password: values.password }),
             });
+
+            // Si el backend responde con redirect, forzar navegación para que el navegador setee las cookies
+            if (res.redirected && res.url) {
+                window.location.href = res.url;
+                return;
+            }
 
             const json = await res.json().catch(() => null);
 
@@ -138,6 +144,11 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                         placeholder="Introduce tu email"
                         className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
                         autoComplete="email"
+                        inputMode="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        maxLength={254}
                         required
                         {...emailRegister}
                         aria-invalid={!!errors.email}
@@ -183,6 +194,8 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                         placeholder="Introduce tu contraseña"
                         className="w-full bg-transparent px-0 py-3 text-sm focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900"
                         autoComplete="current-password"
+                        minLength={8}
+                        maxLength={72}
                         required
                         {...passwordRegister}
                         aria-invalid={!!errors.password}

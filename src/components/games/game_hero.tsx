@@ -34,7 +34,7 @@ export function GameHero({ games }: Props) {
   }
 
   return (
-    <section className="group relative min-h-[300px] md:min-h-[350px] overflow-visible rounded-3xl md:rounded-[2.5rem] w-full">
+    <section className="group relative min-h-[300px] md:min-h-[350px] overflow-visible rounded-3xl md:rounded-[2.5rem] w-full game-hero">
       <Swiper
         modules={[Autoplay, Pagination, Navigation, EffectFade]}
         effect="fade"
@@ -113,6 +113,15 @@ export function GameHero({ games }: Props) {
           );
         })}
       </Swiper>
+
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .game-hero .swiper-button-next,
+          .game-hero .swiper-button-prev {
+            display: none !important;
+          }
+        }
+      `}</style>
 
       {/* Subtle overlay lines for texture */}
 

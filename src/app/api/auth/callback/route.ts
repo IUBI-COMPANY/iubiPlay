@@ -8,14 +8,9 @@ export async function GET(req: NextRequest) {
   const nextParam = url.searchParams.get('next') ?? '/';
   const safeNext = nextParam.startsWith('/') ? nextParam : '/';
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[OAuth Callback] URL:', req.url);
-    console.log('[OAuth Callback] Code:', code);
-    console.log('[OAuth Callback] Next:', safeNext);
-  }
+  // (debug) logs eliminados
 
   if (!code) {
-    console.log('[OAuth Callback] Falta el parámetro code');
     return NextResponse.redirect(new URL('/auth/login?error=missing_code', req.url));
   }
 
@@ -23,7 +18,6 @@ export async function GET(req: NextRequest) {
   const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.log('[OAuth Callback] Configuración de Supabase incompleta');
     return NextResponse.redirect(new URL('/auth/login?error=supabase_config', req.url));
   }
 
@@ -34,22 +28,13 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data?.session) {
-    console.log('[OAuth Callback] Error al intercambiar código:', error);
     return NextResponse.redirect(new URL('/auth/login?error=auth_callback', req.url));
   }
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[OAuth Callback] Sesión obtenida:', {
-      user: data.session.user?.id,
-      access_token: data.session.access_token ? '[OK]' : '[NO]',
-      refresh_token: data.session.refresh_token ? '[OK]' : '[NO]',
-    });
-  }
+  // (debug) logs eliminados
 
   const res = NextResponse.redirect(new URL(`/auth/callback?next=${encodeURIComponent(safeNext)}`, req.url));
   setAuthCookies(res, data.session);
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[OAuth Callback] Cookies seteadas');
-  }
+  // (debug) logs eliminados
   return res;
 }

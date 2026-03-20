@@ -72,9 +72,7 @@ export async function POST(req: NextRequest) {
           .eq("id", data.user.id);
       }
     } catch (profileError) {
-      if (process.env.NODE_ENV !== "production") {
-        console.log("[auth/session] profile upsert error", profileError);
-      }
+      // (debug) logs eliminados
     }
 
     const res = NextResponse.json({ ok: true });

@@ -9,6 +9,31 @@ interface LoginBody {
   password: string;
 }
 
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 8;
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0]?.trim() ?? 'unknown';
+  return req.headers.get('x-real-ip') ?? 'unknown';
+}
+
+function isRateLimited(key: string) {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || entry.resetAt <= now) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { limited: false, retryAfter: 0 };
+  }
+  entry.count += 1;
+  if (entry.count > RATE_LIMIT_MAX) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+    return { limited: true, retryAfter };
+  }
+  return { limited: false, retryAfter: 0 };
+}
+
 function parseLoginBody(data: unknown): LoginBody | null {
   if (!data || typeof data !== 'object') return null;
   const record = data as Record<string, unknown>;
@@ -18,9 +43,26 @@ function parseLoginBody(data: unknown): LoginBody | null {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const ipRate = isRateLimited(`ip:${ip}`);
+    if (ipRate.limited) {
+      return NextResponse.json(
+        { ok: false, message: 'Demasiadas solicitudes. Intenta más tarde.' },
+        { status: 429, headers: { 'Retry-After': String(ipRate.retryAfter) } }
+      );
+    }
+
     const body = parseLoginBody(await req.json());
     if (!body) {
       return NextResponse.json({ ok: false, message: 'Body inválido' }, { status: 400 });
+    }
+
+    const emailRate = isRateLimited(`email:${body.email.toLowerCase()}`);
+    if (emailRate.limited) {
+      return NextResponse.json(
+        { ok: false, message: 'Demasiadas solicitudes. Intenta más tarde.' },
+        { status: 429, headers: { 'Retry-After': String(emailRate.retryAfter) } }
+      );
     }
 
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
@@ -51,7 +93,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, message }, { status: 401 });
     }
 
-    const res = NextResponse.json({ ok: true, message: 'Login exitoso' });
+      // --- Redirección tras login exitoso para setear cookies correctamente ---
+      const redirectTo = req.nextUrl.searchParams.get('redirectTo') || '/';
+      const res = NextResponse.redirect(new URL(redirectTo, req.url));
     setAuthCookies(res, data.session);
 
     // --- Sesión única: genera y guarda session_token, setea cookies ---
@@ -79,7 +123,7 @@ export async function POST(req: NextRequest) {
       });
     }
     // --- fin sesión única ---
-    return res;
+      return res; // This line remains unchanged
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error interno';
     if (process.env.NODE_ENV !== 'production') {

@@ -6,9 +6,11 @@ import { useAuthUser } from '@/src/hooks/useAuthUser';
 import { useRouter } from 'next/navigation';
 import { GameGallery } from '@/src/components/games/game_gallery';
 import { getGameBySlug, listGames } from '@/src/lib/db/games';
+import { getProfileById } from '@/src/lib/db/profiles';
 import { ArrowLeft, Play, Sparkles } from 'lucide-react';
 import { AddToClassButton } from '@/src/components/classes/add_to_class_button';
 import { GameRowCarousel } from '@/src/components/games/game_row_carousel';
+import { Loader } from '@/src/components/ui/loader';
 import type { Game } from '@/src/types/game';
 
 type RelatedList = { items: Game[]; total?: number; summary?: unknown };
@@ -18,6 +20,7 @@ type Props = { params: Promise<{ slug: string }> };
 export default function GameDetailPage({ params }: Props) {
   const [game, setGame] = useState<Game | null>(null);
   const [relatedList, setRelatedList] = useState<RelatedList>({ items: [] });
+  const [addedBy, setAddedBy] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const { user, loading: authLoading } = useAuthUser();
   const router = useRouter();
@@ -27,6 +30,12 @@ export default function GameDetailPage({ params }: Props) {
       const { slug } = await params;
       const g = await getGameBySlug(slug);
       setGame(g);
+      if (g?.created_by) {
+        const profile = await getProfileById(g.created_by);
+        setAddedBy(profile?.username ?? profile?.email ?? null);
+      } else {
+        setAddedBy(null);
+      }
       const rl = await listGames({ status: 'published', limit: 6, throwOnError: false });
       setRelatedList(rl);
       setLoading(false);
@@ -44,7 +53,7 @@ export default function GameDetailPage({ params }: Props) {
     }
   }, [user, authLoading, router, game]);
 
-  if (loading) return <main className="min-h-[50vh] flex items-center justify-center"><span className="text-lg font-bold animate-pulse">Cargando...</span></main>;
+  if (loading) return <main className="min-h-[50vh] flex items-center justify-center"><Loader size={36} /></main>;
   if (!game) {
     return (
       <main className="min-h-[50vh] flex flex-col items-center justify-center">
@@ -113,12 +122,17 @@ export default function GameDetailPage({ params }: Props) {
 
             {/* AddToClassButton always visible below play button */}
             <AddToClassButton game={game} />
+            {addedBy && (
+              <div className="text-xs text-slate-400">
+                Agregado por <span className="font-semibold text-slate-300">@{addedBy}</span>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Carrusel Footer: Juegos Relacionados */}
-      <section className="pt-8 border-t border-slate-200 dark:border-white/10">
+      <section className="pt-8">
         <GameRowCarousel title="También te podría interesar" games={relatedList.items} href="/games" />
       </section>
     </main>

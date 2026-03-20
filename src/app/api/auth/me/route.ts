@@ -43,11 +43,7 @@ export async function GET(req: NextRequest) {
         .eq('id', data.user.id)
         .maybeSingle();
       // Validación de sesión única
-      if (debug) {
-        console.log('[auth/me] user:', data.user.id);
-        console.log('[auth/me] session_token cookie:', sessionTokenCookie ?? '[none]');
-        console.log('[auth/me] session_token profile:', profile?.session_token ?? '[none]');
-      }
+      // (debug) logs eliminados
       if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
         return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
       }
@@ -82,11 +78,7 @@ export async function GET(req: NextRequest) {
     .maybeSingle();
 
   // Validación de sesión única
-  if (debug) {
-    console.log('[auth/me] user (refresh):', refreshData.user.id);
-    console.log('[auth/me] session_token cookie:', sessionTokenCookie ?? '[none]');
-    console.log('[auth/me] session_token profile:', profile?.session_token ?? '[none]');
-  }
+  // (debug) logs eliminados
   if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
     return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
   }
