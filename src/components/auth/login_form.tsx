@@ -84,6 +84,17 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
         },
     });
 
+    // Obtiene el origin correcto según entorno
+    function getAppOrigin() {
+        if (typeof window !== 'undefined') {
+            if (process.env.NODE_ENV === 'production') {
+                return 'https://iubi-play.vercel.app';
+            }
+            return window.location.origin;
+        }
+        return '';
+    }
+
     const handleGoogleLogin = async () => {
         setMessageError(null);
         const supabase = getBrowserSupabaseClient();
@@ -92,7 +103,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback?next=${nextParam}`,
+                redirectTo: `${getAppOrigin()}/auth/callback?next=${nextParam}`,
             },
         });
         if (error) setMessageError(error.message);
@@ -112,7 +123,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
         }
         const supabase = getBrowserSupabaseClient();
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/v1/callback`,
+            redirectTo: `${getAppOrigin()}/auth/v1/callback`,
         });
         if (error) {
             setResetError(error.message);
