@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
           .eq("id", data.user.id);
       }
     } catch (profileError) {
-      // (debug) logs eliminados
+      console.error("Error al obtener o crear el perfil:", profileError);
     }
 
     const res = NextResponse.json({ ok: true });

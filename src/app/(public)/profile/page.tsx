@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { z } from "zod";
 import { useAuthUser } from "@/src/hooks/useAuthUser";
 import { Loader } from "@/src/components/ui/loader";
@@ -33,7 +34,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setUsername(user?.username ?? "");
-  }, [user?.username]);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -163,9 +164,9 @@ export default function ProfilePage() {
             <p className="text-xs font-semibold text-slate-400">Mis clases</p>
             <p className="text-[11px] text-slate-500">Accesos rápidos a tus clases</p>
           </div>
-          <a href="/my-classes" className="text-xs font-semibold text-violet-300 hover:text-violet-200">
+          <Link href="/my-classes" className="text-xs font-semibold text-violet-300 hover:text-violet-200">
             Ver todas
-          </a>
+          </Link>
         </div>
         {loadingClasses ? (
           <div className="text-sm text-slate-400">Cargando clases...</div>
@@ -174,7 +175,7 @@ export default function ProfilePage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {classes.map((c) => (
-              <a
+              <Link
                 key={c.id}
                 href={`/my-classes/${c.id}`}
                 className="rounded-2xl border border-white/10 bg-slate-800 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
@@ -183,7 +184,7 @@ export default function ProfilePage() {
                   <span className="truncate">{c.name}</span>
                   <span className="text-[11px] text-slate-400">{c.gameCount ?? 0} juegos</span>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         )}

@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
     : req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
   const sessionTokenCookie = req.cookies.get('session_token')?.value;
-  const debug = process.env.NODE_ENV !== 'production';
 
   if (!token && !refreshToken) {
     return NextResponse.json({ ok: false, message: 'No autenticado' }, { status: 401 });
@@ -78,7 +77,7 @@ export async function GET(req: NextRequest) {
     .maybeSingle();
 
   // Validación de sesión única
-  // (debug) logs eliminados
+
   if (profile?.session_token && sessionTokenCookie && profile.session_token !== sessionTokenCookie) {
     return NextResponse.json({ ok: false, message: 'Sesión inválida (otro dispositivo ha iniciado sesión)' }, { status: 401 });
   }

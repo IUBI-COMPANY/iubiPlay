@@ -50,7 +50,7 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
 
             // Si el backend responde con redirect, forzar navegación para que el navegador setee las cookies
             if (res.redirected && res.url) {
-                window.location.href = res.url;
+                router.replace(res.url);
                 return;
             }
 
