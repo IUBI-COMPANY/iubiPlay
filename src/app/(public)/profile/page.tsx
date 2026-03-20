@@ -142,7 +142,7 @@ export default function ProfilePage() {
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase())}
             className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-            placeholder="tu_usuario"
+            placeholder="Tu Usuario"
           />
         </div>
         {message && <div className="text-sm font-semibold text-violet-300">{message}</div>}

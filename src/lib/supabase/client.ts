@@ -9,16 +9,6 @@ const rawAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const SUPABASE_URL = rawUrl.trim();
 const SUPABASE_ANON_KEY = rawAnonKey.trim().replace(/^['"]|['"]$/g, "");
 
-if (process.env.NODE_ENV !== "production") {
-    console.log("[supabase][client] env-check", {
-        hasUrl: Boolean(SUPABASE_URL),
-        hasAnonKey: Boolean(SUPABASE_ANON_KEY),
-        urlPreview: SUPABASE_URL ? `${SUPABASE_URL.slice(0, 32)}...` : "missing",
-        anonKeyLength: SUPABASE_ANON_KEY.length,
-        anonKeyStartsWithEy: SUPABASE_ANON_KEY.startsWith("ey"),
-    });
-}
-
 let browserSupabase: SupabaseClient | null = null;
 
 export function getBrowserSupabaseClient(): SupabaseClient {
