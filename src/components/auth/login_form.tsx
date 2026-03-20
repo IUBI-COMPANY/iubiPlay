@@ -113,10 +113,12 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
     const [resetEmail, setResetEmail] = React.useState<string>('');
     const [resetSent, setResetSent] = React.useState<boolean>(false);
     const [resetError, setResetError] = React.useState<string | null>(null);
-    const handlePasswordReset = async () => {
+    const [showReset, setShowReset] = React.useState<boolean>(false);
+    const handlePasswordReset = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         setResetError(null);
         setResetSent(false);
-        const email = resetEmail || (document.getElementById('login-email') as HTMLInputElement)?.value;
+        const email = resetEmail.trim() || (document.getElementById('login-email') as HTMLInputElement)?.value;
         if (!email) {
             setResetError('Por favor ingresa tu email');
             return;
@@ -179,21 +181,35 @@ export default function LoginForm({ redirectTo, onSuccess }: Props) {
                         type="button"
                         className="text-xs font-semibold text-slate-400 hover:text-violet-600 transition-colors"
                         onClick={() => {
-                            const email = (document.getElementById('login-email') as HTMLInputElement)?.value || '';
-                            setResetEmail(email);
+                            setShowReset(true);
+                            setResetEmail((document.getElementById('login-email') as HTMLInputElement)?.value || '');
                             setResetSent(false);
                             setResetError(null);
-                            // Show prompt
-                            const input = window.prompt('Introduce tu email para recuperar la contraseña:', email);
-                            if (input) {
-                                setResetEmail(input);
-                                handlePasswordReset();
-                            }
                         }}
                     >
                         Olvidé mi contraseña
                     </button>
                 </div>
+                {showReset && (
+                    <form onSubmit={handlePasswordReset} className="mt-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg flex flex-col gap-2 shadow-lg max-w-xs mx-auto">
+                        <label htmlFor="reset-email" className="text-xs font-bold text-slate-700 dark:text-slate-300">Correo electrónico</label>
+                        <input
+                            id="reset-email"
+                            type="email"
+                            className="w-full px-2 py-2 rounded border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900"
+                            placeholder="Tu email"
+                            value={resetEmail}
+                            onChange={e => setResetEmail(e.target.value)}
+                            required
+                        />
+                        <div className="flex gap-2 mt-2">
+                            <button type="submit" className="flex-1 bg-violet-600 text-white rounded px-3 py-2 text-xs font-bold hover:bg-violet-700 transition">Enviar enlace</button>
+                            <button type="button" className="flex-1 bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-white rounded px-3 py-2 text-xs font-bold hover:bg-slate-400 dark:hover:bg-slate-600 transition" onClick={() => setShowReset(false)}>Cancelar</button>
+                        </div>
+                        {resetError && <p className="text-xs font-medium text-red-500 mt-1">{resetError}</p>}
+                        {resetSent && <p className="text-xs font-medium text-green-600 mt-1">Se ha enviado un correo para recuperar tu contraseña.</p>}
+                    </form>
+                )}
                 <div className={`relative group border-b-2 transition-all ${
                   errors.password 
                     ? 'border-red-500' 

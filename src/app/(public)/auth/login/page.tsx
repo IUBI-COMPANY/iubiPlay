@@ -78,14 +78,7 @@ export default async function LoginPage({ searchParams }: Props) {
             </p>
           </div>
 
-          <LoginForm redirectTo={redirectTo} />
-
-          {/* Additional "Forgot password" link as shown in the image */}
-          <div className="mt-8 text-center lg:text-right">
-             <p className="text-sm font-medium text-slate-400">
-                ¿Olvidaste tu contraseña? <button className="text-slate-900 dark:text-white font-bold hover:underline" type="button">Haz clic aquí</button>
-             </p>
-          </div>
+           <LoginForm redirectTo={redirectTo} />
         </div>
       </div>
     </div>

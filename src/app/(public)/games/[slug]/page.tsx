@@ -49,7 +49,14 @@ export default function GameDetailPage({ params }: Props) {
     }
     if (!user) {
       e.preventDefault();
-      router.push(`/auth/login?redirectTo=${encodeURIComponent(game?.redirect_url || '#')}`);
+      function getAppOrigin() {
+        if (typeof window === 'undefined') return '';
+        if (process.env.NODE_ENV === 'production') {
+          return 'https://iubi-play.vercel.app';
+        }
+        return window.location.origin;
+      }
+      router.push(`/auth/login?redirectTo=${encodeURIComponent(getAppOrigin() + (game?.redirect_url || '#'))}`);
     }
   }, [user, authLoading, router, game]);
 

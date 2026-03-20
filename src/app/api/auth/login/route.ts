@@ -94,7 +94,23 @@ export async function POST(req: NextRequest) {
     }
 
       // --- Redirección tras login exitoso para setear cookies correctamente ---
-      const redirectTo = req.nextUrl.searchParams.get('redirectTo') || '/';
+      let redirectTo = req.nextUrl.searchParams.get('redirectTo') || '/';
+      // Only allow relative paths, never full URLs or localhost
+      if (/^https?:\/\//i.test(redirectTo)) {
+        try {
+          const url = new URL(redirectTo);
+          // Only allow our production domain
+          if (url.hostname !== 'iubi-play.vercel.app') {
+            redirectTo = '/';
+          } else {
+            redirectTo = url.pathname + (url.search || '');
+          }
+        } catch {
+          redirectTo = '/';
+        }
+      } else if (!redirectTo.startsWith('/')) {
+        redirectTo = '/';
+      }
       const res = NextResponse.redirect(new URL(redirectTo, req.url));
     setAuthCookies(res, data.session);
 

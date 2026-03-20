@@ -95,12 +95,20 @@ export default function RegisterForm() {
     },
   });
 
+  // Devuelve el dominio correcto según entorno
+  function getAppOrigin() {
+    if (typeof window === 'undefined') return '';
+    if (process.env.NODE_ENV === 'production') {
+      return 'https://iubi-play.vercel.app';
+    }
+    return window.location.origin;
+  }
+
   const handleGoogleRegister = async () => {
     setMessageError(null);
     try {
       const supabase = (await import('@/src/lib/supabase/client')).getBrowserSupabaseClient();
-      // Fallback: si es localhost usa /auth/callback, si no usa la de Supabase cloud
-      const redirectTo = `${window.location.origin}/auth/callback`;
+      const redirectTo = `${getAppOrigin()}/auth/callback`;
       const { error, data } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo },

@@ -6,7 +6,20 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const nextParam = url.searchParams.get('next') ?? '/';
-  const safeNext = nextParam.startsWith('/') ? nextParam : '/';
+  let safeNext = '/';
+  // Only allow relative paths, never full URLs or localhost
+  if (/^https?:\/\//i.test(nextParam)) {
+    try {
+      const nextUrl = new URL(nextParam);
+      if (nextUrl.hostname === 'iubi-play.vercel.app') {
+        safeNext = nextUrl.pathname + (nextUrl.search || '');
+      }
+    } catch {
+      safeNext = '/';
+    }
+  } else if (nextParam.startsWith('/')) {
+    safeNext = nextParam;
+  }
 
   // (debug) logs eliminados
 

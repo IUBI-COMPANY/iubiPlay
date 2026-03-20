@@ -74,7 +74,14 @@ export function AddToClassButton({ game }: Props) {
 
   const handleOpen = () => {
     if (!user) {
-      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(window.location.pathname)}`;
+      function getAppOrigin() {
+        if (typeof window === 'undefined') return '';
+        if (process.env.NODE_ENV === 'production') {
+          return 'https://iubi-play.vercel.app';
+        }
+        return window.location.origin;
+      }
+      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(getAppOrigin() + window.location.pathname)}`;
       return;
     }
     setError(null);

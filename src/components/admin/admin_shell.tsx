@@ -41,7 +41,14 @@ export function AdminShell({ children }: Props) {
   React.useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push('/auth/login?redirectTo=' + encodeURIComponent(pathname));
+      function getAppOrigin() {
+        if (typeof window === 'undefined') return '';
+        if (process.env.NODE_ENV === 'production') {
+          return 'https://iubi-play.vercel.app';
+        }
+        return window.location.origin;
+      }
+      router.push(`/auth/login?redirectTo=${encodeURIComponent(getAppOrigin() + pathname)}`);
       return;
     }
     if (!isAllowed) {
